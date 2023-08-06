@@ -9,7 +9,8 @@ const userSchema = mongoose.Schema({
   email: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
+    unique: true,
   },
   password: {
     type: String,
@@ -18,7 +19,6 @@ const userSchema = mongoose.Schema({
   },
   userPic: {
     type: String,
-    required: true,
     default: "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg",
   },
   isAdmin: {
