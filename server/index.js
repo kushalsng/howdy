@@ -4,17 +4,11 @@ const { chats } = require("./data/data.js");
 const connectDB = require("./config/db.js");
 const colors = require('colors')
 
+const userRoutes = require('./routes/user.js')
 const app = express();
 connectDB()
 
-app.get("/", (req, res) => {
-  res.send("App is running")
-})
-
-app.get("/api/chat", (req, res) => {
-  res.send(chats)
-})
-
+app.use('/api/user', userRoutes)
 app.get('/api/chat/:id', (req, res) => {
   const singleChat = chats.find(chat => chat._id === req.params.id)
   res.send(singleChat)
