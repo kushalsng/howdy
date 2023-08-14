@@ -7,17 +7,86 @@ import {
   InputGroup,
   InputRightElement,
   VStack,
+  useToast,
 } from '@chakra-ui/react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const SignUp = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false)
+  const toast = useToast();
+  const navigate = useNavigate()
 
-  const submitHandler = () => {};
+  const submitHandler = async () => {
+    setLoading(true)
+    if(!email || !password) {
+      toast({
+        title: "All fields are mandatory",
+        status: "warning",
+        duration: 4000,
+        isClosable: true,
+        position: "top-right",
+        variant: "left-accent"
+      })
+      setLoading(false);
+      return;
+    }
+    const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+    if(!emailRegex.test(email)){
+      toast({
+        title: "Please enter a valid email!",
+        status: "warning",
+        duration: 4000,
+        isClosable: true,
+        position: "top-right",
+        variant: "left-accent"
+      })
+      setLoading(false);
+      return;
+    }
+    try {
+      const { data } = await axios.post("/api/user/login", {
+        email,
+        password,
+      }, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      toast({
+        title: "LogIn Successful!",
+        status: "success",
+        duration: 4000,
+        isClosable: true,
+        position: "top-right",
+        variant: "left-accent"
+      })
+      localStorage.setItem("userInfo", JSON.stringify(data));
+      setLoading(false)
+      navigate('/chats')
+    } catch (err) {
+      console.log("error while sign up: ", err );
+      toast({
+        title: "Unable to Sign Up",
+        description: err.response.data.msg,
+        status: "error",
+        duration: 4000,
+        isClosable: true,
+        position: "top-right",
+        variant: "left-accent"
+      })
+      setLoading(false)
+    }
+  };
+  const handleGuestCredentials = async () => {
+    
+  }
   return (
     <VStack>
-      <FormControl id='email' isRequired mb='1em'>
+      <FormControl id='emailLogin' isRequired mb='1em'>
         <FormLabel>Email</FormLabel>
         <Input
           placeholder='Enter Your Email'
@@ -25,7 +94,7 @@ const SignUp = () => {
           onChange={(e) => setEmail(e.target.value)}
         />
       </FormControl>
-      <FormControl id='password' isRequired mb='1em'>
+      <FormControl id='passwordLogin' isRequired mb='1em'>
         <FormLabel>Password</FormLabel>
         <InputGroup>
           <Input
@@ -50,13 +119,14 @@ const SignUp = () => {
         width='100%'
         style={{ marginTop: 15 }}
         onClick={submitHandler}
+        isLoading={loading}
       >
         Login
       </Button>
       <Button
         colorScheme='red'
         width='100%'
-        onClick={submitHandler}
+        onClick={handleGuestCredentials}
       >
         Get Guest User Credentials
       </Button>

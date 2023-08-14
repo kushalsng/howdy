@@ -7,7 +7,10 @@ import {
   InputGroup,
   InputRightElement,
   VStack,
+  useToast
 } from '@chakra-ui/react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom'
 
 const SignUp = () => {
   const [name, setName] = useState('');
@@ -17,9 +20,129 @@ const SignUp = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [pic, setPic] = useState(null);
+  const [loading, setLoading] = useState(false)
+  const toast = useToast();
+  const navigate = useNavigate()
 
-  const processImg = (file) => {};
-  const submitHandler = () => {};
+  const processImg = (file) => {
+    setLoading(true);
+    if(!file){
+      toast({
+        title: "Please select an image!",
+        status: "warning",
+        duration: 4000,
+        isClosable: true,
+        position: "top-right",
+        variant: "left-accent"
+      })
+      setLoading(false);
+      return;
+    }
+    const imgRegex = /[^\s]+(.*?).(jpg|jpeg|png|gif|JPG|JPEG|PNG|GIF)$/;
+    if(!imgRegex.test(file.type)){
+      toast({
+        title: "Please select a valid image!",
+        status: "warning",
+        duration: 4000,
+        isClosable: true,
+        position: "top-right",
+        variant: "left-accent"
+      })
+      setLoading(false)
+      return;
+    }
+    const data = new FormData();
+    data.append("file", file);
+    data.append("upload_preset", "howdy-chat-app");
+    data.append("cloud_name", process.env.REACT_APP_CLOUDINARY_CLOUD_NAME);
+    fetch(process.env.REACT_APP_CLOUDINARY_API, {
+      method: "post",
+      body: data
+    }).then((res) => res.json())
+      .then((data) => {
+        setPic(data.url.toString());
+        setLoading(false)
+      }).catch((err) => {
+        console.log("error in image upload, ", err);
+        setLoading(false)
+      })
+
+  };
+  const submitHandler = async () => {
+    setLoading(true)
+    if(!name || !email || !password || !confirmPassword) {
+      toast({
+        title: "All fields are mandatory",
+        status: "warning",
+        duration: 4000,
+        isClosable: true,
+        position: "top-right",
+        variant: "left-accent"
+      })
+      setLoading(false);
+      return;
+    }
+    if(password !== confirmPassword) {
+      toast({
+        title: "Passwords don't match",
+        status: "warning",
+        duration: 4000,
+        isClosable: true,
+        position: "top-right",
+        variant: "left-accent"
+      })
+      setLoading(false);
+      return;
+    }
+    const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+    if(!emailRegex.test(email)){
+      toast({
+        title: "Please enter a valid email!",
+        status: "warning",
+        duration: 4000,
+        isClosable: true,
+        position: "top-right",
+        variant: "left-accent"
+      })
+      setLoading(false);
+      return;
+    }
+    try {
+      const { data } = await axios.post("/api/user", {
+        name,
+        email,
+        password,
+        pic
+      }, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      toast({
+        title: "Sign Up Successful!",
+        status: "success",
+        duration: 4000,
+        isClosable: true,
+        position: "top-right",
+        variant: "left-accent"
+      })
+      localStorage.setItem("userInfo", JSON.stringify(data));
+      setLoading(false)
+      navigate('/chats')
+    } catch (err) {
+      console.log("error while sign up: ", err );
+      toast({
+        title: "Unable to Sign Up",
+        description: err.response.data.msg,
+        status: "error",
+        duration: 4000,
+        isClosable: true,
+        position: "top-right",
+        variant: "left-accent"
+      })
+      setLoading(false)
+    }
+  };
   return (
     <VStack>
       <FormControl id='first-name' isRequired mb='1em'>
@@ -93,6 +216,7 @@ const SignUp = () => {
         width='100%'
         style={{ marginTop: 15 }}
         onClick={submitHandler}
+        isLoading={loading}
       >
         Sign Up
       </Button>

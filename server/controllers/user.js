@@ -3,13 +3,10 @@ const User = require('../models/user.js');
 const generateToken = require('../config/generateToken.js');
 
 exports.registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password, confirmPassword, pic } = req.body;
+  const { name, email, password, pic } = req.body;
 
-  if(!name || !email || !password || !confirmPassword){
+  if(!name || !email || !password){
     return res.status(400).json({ msg: "All fields are mandatory!"})
-  }
-  if(password !== confirmPassword){
-    return res.status(400).json({ msg: `Passwords doesn't match!`})
   }
   const userExists = await User.findOne({ email })
 
@@ -20,7 +17,7 @@ exports.registerUser = asyncHandler(async (req, res) => {
     name,
     email,
     password,
-    pic,
+    userPic: pic,
   })
   if(newUser){
     return res.status(201).json({ success: true, user: newUser, token: generateToken(newUser._id) })
