@@ -16,7 +16,7 @@ const userSchema = mongoose.Schema({
   password: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
   },
   userPic: {
     type: String,
@@ -30,7 +30,6 @@ const userSchema = mongoose.Schema({
 }, { timestamps: true });
 
 userSchema.methods.matchPassword = async function (password) {
-  console.log(password, this.password)
   return await bcrypt.compare(password, this.password)
 }
 userSchema.pre('save', async function (next) {

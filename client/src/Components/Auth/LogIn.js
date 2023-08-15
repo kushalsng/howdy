@@ -68,7 +68,7 @@ const SignUp = () => {
       setLoading(false)
       navigate('/chats')
     } catch (err) {
-      console.log("error while sign up: ", err );
+      console.error("error while sign up: ", err );
       toast({
         title: "Unable to Sign Up",
         description: err.response.data.msg,
