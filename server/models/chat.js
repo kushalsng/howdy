@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const chatSchema = mongoose.Schema({
-    chatName: {
+    name: {
       type: String,
       trim: true,
     },
