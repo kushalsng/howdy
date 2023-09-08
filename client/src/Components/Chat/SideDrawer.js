@@ -15,6 +15,7 @@ import React, { useState } from 'react'
 import Howdy from '../Howdy'
 import { ChatState } from '../../Context/ChatProvider'
 import ProfileModal from '../Modals/ProfileModal'
+import { useNavigate } from 'react-router-dom'
 
 
 const SideDrawer = () => {
@@ -23,7 +24,13 @@ const SideDrawer = () => {
   const [ loading , setLoading ] = useState(false)
   const [ loadingChat , setLoadingChat ] = useState(false)
 
-  const { user } = ChatState()
+  const { user } = ChatState();
+  const navigate = useNavigate();
+
+  const logoutHandler = () => {
+    localStorage.removeItem('user');
+    navigate('/');
+  }
 
   return (
     <>
@@ -64,7 +71,7 @@ const SideDrawer = () => {
                 <MenuItem>My Profile</MenuItem>
               </ProfileModal>
               <MenuDivider />
-              <MenuItem>Logout</MenuItem>
+              <MenuItem onClick={logoutHandler}>Logout</MenuItem>
             </MenuList>
           </Menu>
         </div>

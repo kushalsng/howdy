@@ -16,34 +16,34 @@ const SignUp = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
   const toast = useToast();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const submitHandler = async () => {
-    setLoading(true)
-    if(!email || !password) {
+    setLoading(true);
+    if (!email || !password) {
       toast({
-        title: "All fields are mandatory",
-        status: "warning",
+        title: 'All fields are mandatory',
+        status: 'warning',
         duration: 4000,
         isClosable: true,
-        position: "top-right",
-        variant: "left-accent"
-      })
+        position: 'bottom',
+        variant: 'left-accent',
+      });
       setLoading(false);
       return;
     }
     const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
-    if(!emailRegex.test(email)){
+    if (!emailRegex.test(email)) {
       toast({
-        title: "Please enter a valid email!",
-        status: "warning",
+        title: 'Please enter a valid email!',
+        status: 'warning',
         duration: 4000,
         isClosable: true,
-        position: "top-right",
-        variant: "left-accent"
-      })
+        position: 'bottom',
+        variant: 'left-accent',
+      });
       setLoading(false);
       return;
     }
@@ -51,35 +51,33 @@ const SignUp = () => {
       const { data } = await login({
         email,
         password,
-      })
+      });
       toast({
-        title: "LogIn Successful!",
-        status: "success",
+        title: 'LogIn Successful!',
+        status: 'success',
         duration: 4000,
         isClosable: true,
-        position: "top-right",
-        variant: "left-accent"
-      })
-      localStorage.setItem("user", JSON.stringify(data.user));
-      setLoading(false)
-      navigate('/chats')
+        position: 'bottom',
+        variant: 'left-accent',
+      });
+      localStorage.setItem('user', JSON.stringify(data.user));
+      setLoading(false);
+      navigate('/chats');
     } catch (err) {
-      console.error("error while sign up: ", err );
+      console.error('error while sign up: ', err);
       toast({
-        title: "Unable to Sign Up",
+        title: 'Unable to Sign Up',
         description: err.response.data.msg,
-        status: "error",
+        status: 'error',
         duration: 4000,
         isClosable: true,
-        position: "top-right",
-        variant: "left-accent"
-      })
-      setLoading(false)
+        position: 'bottom',
+        variant: 'left-accent',
+      });
+      setLoading(false);
     }
   };
-  const handleGuestCredentials = async () => {
-    
-  }
+  const handleGuestCredentials = async () => {};
   return (
     <VStack>
       <FormControl id='emailLogin' isRequired mb='1em'>
@@ -119,11 +117,7 @@ const SignUp = () => {
       >
         Login
       </Button>
-      <Button
-        colorScheme='red'
-        width='100%'
-        onClick={handleGuestCredentials}
-      >
+      <Button colorScheme='red' width='100%' onClick={handleGuestCredentials}>
         Get Guest User Credentials
       </Button>
     </VStack>

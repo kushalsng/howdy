@@ -7,10 +7,10 @@ import {
   InputGroup,
   InputRightElement,
   VStack,
-  useToast
+  useToast,
 } from '@chakra-ui/react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
 import { register } from '../../Helper/auth_api_helper';
 
 const SignUp = () => {
@@ -21,90 +21,91 @@ const SignUp = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [pic, setPic] = useState(null);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
   const toast = useToast();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const processImg = (file) => {
     setLoading(true);
-    if(!file){
+    if (!file) {
       toast({
-        title: "Please select an image!",
-        status: "warning",
+        title: 'Please select an image!',
+        status: 'warning',
         duration: 4000,
         isClosable: true,
-        position: "top-right",
-        variant: "left-accent"
-      })
+        position: 'bottom',
+        variant: 'left-accent',
+      });
       setLoading(false);
       return;
     }
     const imgRegex = /[^\s]+(.*?).(jpg|jpeg|png|gif|JPG|JPEG|PNG|GIF)$/;
-    if(!imgRegex.test(file.type)){
+    if (!imgRegex.test(file.type)) {
       toast({
-        title: "Please select a valid image!",
-        status: "warning",
+        title: 'Please select a valid image!',
+        status: 'warning',
         duration: 4000,
         isClosable: true,
-        position: "top-right",
-        variant: "left-accent"
-      })
-      setLoading(false)
-      return;
-    }
-    const data = new FormData();
-    data.append("file", file);
-    data.append("upload_preset", "howdy-chat-app");
-    data.append("cloud_name", process.env.REACT_APP_CLOUDINARY_CLOUD_NAME);
-    fetch(process.env.REACT_APP_CLOUDINARY_API, {
-      method: "post",
-      body: data
-    }).then((res) => res.json())
-      .then((data) => {
-        setPic(data.url.toString());
-        setLoading(false)
-      }).catch((err) => {
-        console.error("error in image upload, ", err);
-        setLoading(false)
-      })
-
-  };
-  const submitHandler = async () => {
-    setLoading(true)
-    if(!name || !email || !password || !confirmPassword) {
-      toast({
-        title: "All fields are mandatory",
-        status: "warning",
-        duration: 4000,
-        isClosable: true,
-        position: "top-right",
-        variant: "left-accent"
-      })
+        position: 'bottom',
+        variant: 'left-accent',
+      });
       setLoading(false);
       return;
     }
-    if(password !== confirmPassword) {
+    const data = new FormData();
+    data.append('file', file);
+    data.append('upload_preset', 'howdy-chat-app');
+    data.append('cloud_name', process.env.REACT_APP_CLOUDINARY_CLOUD_NAME);
+    fetch(process.env.REACT_APP_CLOUDINARY_API, {
+      method: 'post',
+      body: data,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setPic(data.url.toString());
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('error in image upload, ', err);
+        setLoading(false);
+      });
+  };
+  const submitHandler = async () => {
+    setLoading(true);
+    if (!name || !email || !password || !confirmPassword) {
       toast({
-        title: "Passwords don't match",
-        status: "warning",
+        title: 'All fields are mandatory',
+        status: 'warning',
         duration: 4000,
         isClosable: true,
-        position: "top-right",
-        variant: "left-accent"
-      })
+        position: 'bottom',
+        variant: 'left-accent',
+      });
+      setLoading(false);
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast({
+        title: "Passwords don't match",
+        status: 'warning',
+        duration: 4000,
+        isClosable: true,
+        position: 'bottom',
+        variant: 'left-accent',
+      });
       setLoading(false);
       return;
     }
     const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
-    if(!emailRegex.test(email)){
+    if (!emailRegex.test(email)) {
       toast({
-        title: "Please enter a valid email!",
-        status: "warning",
+        title: 'Please enter a valid email!',
+        status: 'warning',
         duration: 4000,
         isClosable: true,
-        position: "top-right",
-        variant: "left-accent"
-      })
+        position: 'bottom',
+        variant: 'left-accent',
+      });
       setLoading(false);
       return;
     }
@@ -113,31 +114,31 @@ const SignUp = () => {
         name,
         email,
         password,
-        pic
-      })
+        pic,
+      });
       toast({
-        title: "Sign Up Successful!",
-        status: "success",
+        title: 'Sign Up Successful!',
+        status: 'success',
         duration: 4000,
         isClosable: true,
-        position: "top-right",
-        variant: "left-accent"
-      })
-      localStorage.setItem("user", JSON.stringify(data.user));
-      setLoading(false)
-      navigate('/chats')
+        position: 'bottom',
+        variant: 'left-accent',
+      });
+      localStorage.setItem('user', JSON.stringify(data.user));
+      setLoading(false);
+      navigate('/chats');
     } catch (err) {
-      console.error("error while sign up: ", err );
+      console.error('error while sign up: ', err);
       toast({
-        title: "Unable to Sign Up",
+        title: 'Unable to Sign Up',
         description: err.response.data.msg,
-        status: "error",
+        status: 'error',
         duration: 4000,
         isClosable: true,
-        position: "top-right",
-        variant: "left-accent"
-      })
-      setLoading(false)
+        position: 'bottom',
+        variant: 'left-accent',
+      });
+      setLoading(false);
     }
   };
   return (
