@@ -9,8 +9,8 @@ import {
   VStack,
   useToast,
 } from '@chakra-ui/react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { login } from '../../Helper/auth_api_helper';
 
 const SignUp = () => {
   const [email, setEmail] = useState('');
@@ -48,13 +48,9 @@ const SignUp = () => {
       return;
     }
     try {
-      const { data } = await axios.post("/api/user/login", {
+      const { data } = await login({
         email,
         password,
-      }, {
-        headers: {
-          "Content-Type": "application/json",
-        },
       })
       toast({
         title: "LogIn Successful!",
@@ -64,7 +60,7 @@ const SignUp = () => {
         position: "top-right",
         variant: "left-accent"
       })
-      localStorage.setItem("userInfo", JSON.stringify(data));
+      localStorage.setItem("user", JSON.stringify(data.user));
       setLoading(false)
       navigate('/chats')
     } catch (err) {

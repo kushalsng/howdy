@@ -1,5 +1,5 @@
 import axios from 'axios';
-const baseURL = 'http://localhost:3000';
+const baseURL = 'http://localhost:5000';
 const token = localStorage.getItem("token")
 
 axios.interceptors.request.use((request) => {
@@ -8,7 +8,6 @@ axios.interceptors.request.use((request) => {
   if(token){
     request.headers['Authorization'] = `Bearer ${token}`;
   }
-  request.withCredentials = true;
 
   return request;
 });

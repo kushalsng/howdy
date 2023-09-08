@@ -3,7 +3,7 @@ const express = require("express");
 const { chats } = require("./data/data.js");
 const connectDB = require("./config/db.js");
 const colors = require('colors')
-
+const cors = require('cors')
 const userRoutes = require('./routes/user.js');
 const authRoutes = require('./routes/auth.js');
 const chatRoutes = require('./routes/chat.js')
@@ -12,6 +12,7 @@ const { isAuthenticated } = require('./middlewares/auth.js');
 
 
 const app = express();
+app.use(cors())
 connectDB()
 
 app.use(express.json())

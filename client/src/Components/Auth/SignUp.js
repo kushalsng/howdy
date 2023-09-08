@@ -11,6 +11,7 @@ import {
 } from '@chakra-ui/react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom'
+import { register } from '../../Helper/auth_api_helper';
 
 const SignUp = () => {
   const [name, setName] = useState('');
@@ -108,15 +109,11 @@ const SignUp = () => {
       return;
     }
     try {
-      const { data } = await axios.post("/api/user", {
+      const { data } = await register({
         name,
         email,
         password,
         pic
-      }, {
-        headers: {
-          "Content-Type": "application/json",
-        },
       })
       toast({
         title: "Sign Up Successful!",
@@ -126,7 +123,7 @@ const SignUp = () => {
         position: "top-right",
         variant: "left-accent"
       })
-      localStorage.setItem("userInfo", JSON.stringify(data));
+      localStorage.setItem("user", JSON.stringify(data.user));
       setLoading(false)
       navigate('/chats')
     } catch (err) {

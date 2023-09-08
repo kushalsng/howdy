@@ -43,6 +43,7 @@ exports.loginUser = asyncHandler(async (req, res) => {
   return res.json({
     success: true,
     msg: "Logged in successfully",
-    token: generateToken(user._id)
+    token: generateToken(user._id),
+    user: user
   })
 })
