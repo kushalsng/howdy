@@ -9,7 +9,7 @@ function App() {
     <div className="App">
       <Routes>
         <Route path="/" exact element={<Homepage />} />
-        <Route path="/chats" component={<ChatPage />} />
+        <Route path="/chats" element={<ChatPage />} />
       </Routes>
     </div>
   );

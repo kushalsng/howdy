@@ -7,11 +7,11 @@ import {
   TabPanel,
   TabPanels,
   Tabs,
-  Text,
 } from '@chakra-ui/react';
 import LogIn from '../Components/Auth/LogIn';
 import SignUp from '../Components/Auth/SignUp';
 import { useNavigate } from 'react-router-dom';
+import Howdy from '../Components/Howdy';
 
 const Homepage = () => {
   const navigate = useNavigate();
@@ -35,9 +35,7 @@ const Homepage = () => {
         borderRadius='lg'
         borderWidth='1px'
       >
-        <Text fontSize='4xl' fontFamily='Work sans' color='black'>
-          Howdy &#128075;
-        </Text>
+        <Howdy />
       </Box>
       <Box bg='white' w='100%' p={4} borderRadius='lg' borderWidth='1px'>
         <Tabs variant='enclosed'>
