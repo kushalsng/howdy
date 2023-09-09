@@ -6,7 +6,7 @@ import { getReceiver } from '../../utils/getReceiver';
 import ProfileModal from '../Modals/ProfileModal'
 import GroupChatModal from '../Modals/GroupChatModal';
 
-const SingleChat = ({ fetch, setFetch }) => {
+const SingleChat = () => {
   const { user, selectedChat, setSelectedChat } = ChatState();
   return (
     <React.Fragment>
@@ -35,7 +35,7 @@ const SingleChat = ({ fetch, setFetch }) => {
             ) : (
               <>
                 {selectedChat.name.toUpperCase()}
-                <GroupChatModal fetch={fetch} setFetch={setFetch} isUpdate={true}>
+                <GroupChatModal isUpdate={true}>
                   <IconButton display={{base: "flex"}} icon={<ViewIcon />} />
                 </GroupChatModal>
               </>

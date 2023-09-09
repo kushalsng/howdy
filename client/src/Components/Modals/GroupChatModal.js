@@ -129,21 +129,6 @@ const GroupChatModal = ({ isUpdate = false, children }) => {
       });
       return;
     }
-    if (
-      selectedChat.isGroupChat &&
-      loggedInUser._id !== selectedChat.groupAdmin._id
-    ) {
-      toast({
-        title: `You're not allowed to perform this action!`,
-        description: 'Unauthorized Request',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-        position: 'bottom',
-        variant: 'left-accent',
-      });
-      return;
-    }
     if (!chatName) {
       toast({
         title: `Can't name a group nothing!`,
@@ -166,6 +151,7 @@ const GroupChatModal = ({ isUpdate = false, children }) => {
       setRenameLoading(false);
       setChatName(data.chat.name);
       setSelectedChat(data.chat);
+      setChats([data.chat, ...chats.filter(chat => chat._id !== data.chat._id)])
       toast({
         title: 'Group Renamed!',
         status: 'success',
@@ -420,7 +406,7 @@ const GroupChatModal = ({ isUpdate = false, children }) => {
       setChatName('');
       setSelectedUsers([]);
     }
-  }, []);
+  }, [selectedChat]);
 
   return (
     <>

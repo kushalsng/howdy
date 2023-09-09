@@ -7,7 +7,7 @@ import ListLoading from '../Loaders/ListLoading';
 import { getReceiver } from '../../utils/getReceiver';
 import GroupChatModal from '../Modals/GroupChatModal';
 
-const MyChats = ({ fetch }) => {
+const MyChats = () => {
   const { selectedChat, setSelectedChat, user, chats, setChats } = ChatState();
   const toast = useToast();
 
@@ -31,7 +31,7 @@ const MyChats = ({ fetch }) => {
   };
   useEffect(() => {
     fetchUserChats();
-  }, [fetch]);
+  }, []);
   return (
     <Box
       display={{ base: selectedChat ? 'none' : 'flex', md: 'flex' }}
