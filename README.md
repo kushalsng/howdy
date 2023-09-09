@@ -56,15 +56,15 @@ npm start</code></pre>
 <p>We would like to extend our gratitude to the developers of the libraries and frameworks used in this project. Without their efforts, this application would not have been possible.</p>
 <p>Happy chatting with Howdy! 🎉👋</p>
 
-    <h3>Features coming soon..</h3>
-    <ul>
-        <li>Video Calling</li>
-        <li>Friend Request</li>
-        <li>User Profile</li>
-        <li>Posts with like feature</li>
-        <li>Timeline</li>
-        <li>Comment Section in post</li>
-    </ul>
+<h3>Features coming soon..</h3>
+<ul>
+    <li>Video Calling</li>
+    <li>Friend Request</li>
+    <li>User Profile</li>
+    <li>Posts with like feature</li>
+    <li>Timeline</li>
+    <li>Comment Section in post</li>
+</ul>
 
 </body>
 </html>
