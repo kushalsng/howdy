@@ -61,6 +61,7 @@ const SignUp = () => {
         variant: 'left-accent',
       });
       localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('token',data.token);
       setLoading(false);
       navigate('/chats');
     } catch (err) {

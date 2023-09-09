@@ -12,7 +12,7 @@ exports.getAllUsers = asyncHandler(async (req, res) => {
       { email: { $regex: search, $options: "i" } }
     ]
   }
-  const users = await User.find(userConditions)
+  const users = await User.find(userConditions).sort('name')
   return res.json({
     success: true,
     users
