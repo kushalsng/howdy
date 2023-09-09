@@ -22,11 +22,13 @@ import UserBadgeItem from '../User/UserBadgeItem';
 import {
   addGroupChat,
   addUserToGroup,
+  leaveGroup,
   removeUserFromGroup,
   renameGroup,
 } from '../../Helper/chat_api_helper';
+import ConfirmationModal from './ConfirmationModal';
 
-const GroupChatModal = ({ fetch, setFetch, isUpdate, children }) => {
+const GroupChatModal = ({ isUpdate = false, children }) => {
   const limit = 5;
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [chatName, setChatName] = useState('');
@@ -37,7 +39,13 @@ const GroupChatModal = ({ fetch, setFetch, isUpdate, children }) => {
   const [renameLoading, setRenameLoading] = useState(false);
 
   const toast = useToast();
-  const { user, chats, setChats, selectedChat, setSelectedChat } = ChatState();
+  const {
+    user: loggedInUser,
+    chats,
+    setChats,
+    selectedChat,
+    setSelectedChat,
+  } = ChatState();
 
   const handleSearch = debounce(async () => {
     if (!search) {
@@ -121,6 +129,21 @@ const GroupChatModal = ({ fetch, setFetch, isUpdate, children }) => {
       });
       return;
     }
+    if (
+      selectedChat.isGroupChat &&
+      loggedInUser._id !== selectedChat.groupAdmin._id
+    ) {
+      toast({
+        title: `You're not allowed to perform this action!`,
+        description: 'Unauthorized Request',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+        position: 'bottom',
+        variant: 'left-accent',
+      });
+      return;
+    }
     if (!chatName) {
       toast({
         title: `Can't name a group nothing!`,
@@ -179,6 +202,21 @@ const GroupChatModal = ({ fetch, setFetch, isUpdate, children }) => {
       });
       return;
     }
+    if (
+      selectedChat.isGroupChat &&
+      loggedInUser._id !== selectedChat.groupAdmin._id
+    ) {
+      toast({
+        title: `You're not allowed to perform this action!`,
+        description: 'Unauthorized Request',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+        position: 'bottom',
+        variant: 'left-accent',
+      });
+      return;
+    }
     if (selectedChat.users.find((chatUser) => chatUser._id === user._id)) {
       toast({
         title: `Can't add ${user.name} to ${selectedChat.name}!`,
@@ -198,6 +236,7 @@ const GroupChatModal = ({ fetch, setFetch, isUpdate, children }) => {
         userId: user._id,
       });
       selectedChat.users.push(user);
+      setSelectedUsers([...selectedChat.users]);
       setSelectedChat({ ...selectedChat });
       toast({
         title: data.msg,
@@ -233,6 +272,21 @@ const GroupChatModal = ({ fetch, setFetch, isUpdate, children }) => {
       });
       return;
     }
+    if (
+      selectedChat.isGroupChat &&
+      loggedInUser._id !== selectedChat.groupAdmin._id
+    ) {
+      toast({
+        title: `You're not allowed to perform this action!`,
+        description: 'Unauthorized Request',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+        position: 'bottom',
+        variant: 'left-accent',
+      });
+      return;
+    }
     if (!selectedChat.users.find((chatUser) => chatUser._id === user._id)) {
       toast({
         title: `Can't remove ${user.name} from ${selectedChat.name}!`,
@@ -251,8 +305,10 @@ const GroupChatModal = ({ fetch, setFetch, isUpdate, children }) => {
         chatId: selectedChat._id,
         userId: user._id,
       });
-      const filteredUsers = selectedUsers.filter((chatUser) => chatUser._id !== user._id)
-      setSelectedUsers([...filteredUsers])
+      const filteredUsers = selectedUsers.filter(
+        (chatUser) => chatUser._id !== user._id
+      );
+      setSelectedUsers([...filteredUsers]);
       setSelectedChat({
         ...selectedChat,
         users: filteredUsers,
@@ -291,7 +347,66 @@ const GroupChatModal = ({ fetch, setFetch, isUpdate, children }) => {
       });
       return;
     }
+    if (
+      selectedChat.isGroupChat &&
+      loggedInUser._id === selectedChat.groupAdmin._id
+    ) {
+      toast({
+        title: `Admin can't leave the group!`,
+        description: 'You must make someone admin before leaving',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+        position: 'bottom',
+        variant: 'left-accent',
+      });
+      return;
+    }
+    if (
+      !selectedChat.users.find((chatUser) => chatUser._id === loggedInUser._id)
+    ) {
+      toast({
+        title: `You're not in ${selectedChat.name}!`,
+        description: `Invalid request`,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+        position: 'bottom',
+        variant: 'left-accent',
+      });
+      return;
+    }
+
+    try {
+      const { data } = await leaveGroup({
+        chatId: selectedChat._id,
+        userId: loggedInUser._id,
+      });
+      setChats(chats.filter((chat) => chat._id !== selectedChat._id));
+      setSelectedChat(null);
+      onClose();
+      toast({
+        title: data.msg,
+        status: 'success',
+        duration: 4000,
+        isClosable: true,
+        position: 'bottom',
+        variant: 'left-accent',
+      });
+    } catch (err) {
+      console.error('error while leaving group: ', err);
+      toast({
+        title: 'Unable to leave group!',
+        description: err.response.data.msg,
+        status: 'error',
+        duration: 4000,
+        isClosable: true,
+        position: 'bottom',
+        variant: 'left-accent',
+      });
+    }
   };
+  const handleDeleteGroup = async () => {};
   useEffect(() => {
     if (isOpen) {
       handleSearch();
@@ -301,8 +416,12 @@ const GroupChatModal = ({ fetch, setFetch, isUpdate, children }) => {
     if (isUpdate) {
       setChatName(selectedChat.name);
       setSelectedUsers(selectedChat.users);
+    } else {
+      setChatName('');
+      setSelectedUsers([]);
     }
   }, []);
+
   return (
     <>
       <span
@@ -348,7 +467,7 @@ const GroupChatModal = ({ fetch, setFetch, isUpdate, children }) => {
             </FormControl>
             {isUpdate &&
             selectedChat?.isGroupChat &&
-            user._id !== selectedChat?.groupAdmin._id ? (
+            loggedInUser._id !== selectedChat?.groupAdmin._id ? (
               <></>
             ) : (
               <FormControl id='users' isRequired mb='1em'>
@@ -364,9 +483,30 @@ const GroupChatModal = ({ fetch, setFetch, isUpdate, children }) => {
                 <UserBadgeItem
                   key={index}
                   user={user}
+                  showClose={
+                    !isUpdate ||
+                    (selectedChat &&
+                      selectedChat.isGroupChat &&
+                      loggedInUser._id === selectedChat.groupAdmin._id &&
+                      loggedInUser._id !== user._id)
+                  }
+                  openModal={
+                    isUpdate &&
+                    selectedChat &&
+                    selectedChat.isGroupChat &&
+                    loggedInUser._id === selectedChat.groupAdmin._id &&
+                    loggedInUser._id !== user._id
+                  }
                   handleRemove={() => {
                     if (isUpdate) {
-                      handleRemoveMember(user);
+                      if (
+                        selectedChat &&
+                        selectedChat.isGroupChat &&
+                        loggedInUser._id === selectedChat.groupAdmin._id &&
+                        loggedInUser._id !== user._id
+                      ) {
+                        handleRemoveMember(user);
+                      }
                     } else {
                       setSelectedUsers(
                         selectedUsers.filter(
@@ -408,9 +548,25 @@ const GroupChatModal = ({ fetch, setFetch, isUpdate, children }) => {
 
           <ModalFooter>
             {isUpdate ? (
-              <Button colorScheme='red' onClick={handleLeaveGroup}>
-                Leave Group
-              </Button>
+              <>
+                {selectedChat &&
+                selectedChat.isGroupChat &&
+                loggedInUser._id !== selectedChat.groupAdmin._id ? (
+                  <ConfirmationModal
+                    isLeave={true}
+                    onConfirm={handleLeaveGroup}
+                  >
+                    <Button colorScheme='red'>Leave Group</Button>
+                  </ConfirmationModal>
+                ) : (
+                  <ConfirmationModal
+                    isDelete={true}
+                    onConfirm={handleDeleteGroup}
+                  >
+                    <Button colorScheme='red'>Delete Group</Button>
+                  </ConfirmationModal>
+                )}
+              </>
             ) : (
               <Button colorScheme='blue' onClick={handleCreateGroup}>
                 Create Group

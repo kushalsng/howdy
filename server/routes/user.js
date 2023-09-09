@@ -4,5 +4,7 @@ const {
 } = require('../controllers/user')
 
 router.route('/').get(getAllUsers);
+// change profile picture
+// change name
 
 module.exports = router

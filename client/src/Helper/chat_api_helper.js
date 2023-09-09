@@ -18,3 +18,6 @@ export const addUserToGroup = async function (params) {
 export const removeUserFromGroup = async function (params) {
   return apis.put("/chat/remove-group-user", params);
 }
+export const leaveGroup = async function (params) {
+  return apis.put("/chat/leave-group", params);
+}
