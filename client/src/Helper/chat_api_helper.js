@@ -1,10 +1,10 @@
 import { apis } from "./api_helper";
 
 export const fetchChats = async function () {
-  return apis.get('/chat/') 
+  return apis.get('/chat') 
 }
 export const fetchOrCreateChat = async function (params) {
-  return apis.post('/chat/', params) 
+  return apis.post('/chat', params) 
 }
 export const addGroupChat = async function (params) {
   return apis.post('/chat/add-group-chat', params)

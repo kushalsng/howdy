@@ -19,6 +19,7 @@ import {
   DrawerCloseButton,
   Input,
   useToast,
+  Spinner,
 } from '@chakra-ui/react';
 import { ChevronDownIcon } from '@chakra-ui/icons';
 import React, { useEffect, useState } from 'react';
@@ -30,7 +31,6 @@ import { getAllUsers } from '../../Helper/user_api_helper'
 import ListLoading from '../Loaders/ListLoading';
 import UserListItem from '../User/UserListItem';
 import { fetchOrCreateChat } from '../../Helper/chat_api_helper'
-import { throttle } from '../../utils/throttle';
 import { debounce } from '../../utils/debounce';
 
 const Header = () => {
@@ -54,6 +54,9 @@ const Header = () => {
     try {
       setLoadingChat(true);
       const { data } = await fetchOrCreateChat({userId});
+      if(!chats.find(chat => chat._id === data.chat._id)){
+        setChats([data.chat, ...chats]);
+      }
       setLoadingChat(false);
       setSelectedChat(data.chat);
       onClose()
@@ -168,14 +171,15 @@ const Header = () => {
             {loading ? (
               <ListLoading />
             ): (
-              userList?.map(user => (
+              userList?.map((user, index) => (
                 <UserListItem
-                  key={user._id}
+                  key={index}
                   user={user}
                   handleClick={() => accessChat(user._id)}
                 />
               ))
             )}
+            {loadingChat && <Spinner ml="auto" display="flex" justifyContent="center" />}
           </DrawerBody>
 
           <DrawerFooter>

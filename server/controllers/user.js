@@ -2,7 +2,8 @@ const asyncHandler = require('express-async-handler');
 const User = require('../models/user.js');
 
 exports.getAllUsers = asyncHandler(async (req, res) => {
-  const { search } = req.query;
+  const { search, limit } = req.query;
+  const limitCount = parseInt(limit);
   const userConditions = {
     _id: { $ne: req.user._id}
   }
@@ -12,9 +13,9 @@ exports.getAllUsers = asyncHandler(async (req, res) => {
       { email: { $regex: search, $options: "i" } }
     ]
   }
-  const users = await User.find(userConditions).sort('name')
+  const users = await User.find(userConditions).sort('name');
   return res.json({
     success: true,
-    users
+    users: limitCount ? users.slice(0, limitCount) : users
   })
 })

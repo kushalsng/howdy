@@ -1,21 +1,12 @@
 import { Skeleton, Stack } from '@chakra-ui/react'
 import React from 'react'
 
-const ListLoading = () => {
+const ListLoading = ({count = 12}) => {
   return (
     <Stack>
-      <Skeleton height='55px' />
-      <Skeleton height='55px' />
-      <Skeleton height='55px' />
-      <Skeleton height='55px' />
-      <Skeleton height='55px' />
-      <Skeleton height='55px' />
-      <Skeleton height='55px' />
-      <Skeleton height='55px' />
-      <Skeleton height='55px' />
-      <Skeleton height='55px' />
-      <Skeleton height='55px' />
-      <Skeleton height='55px' />
+      {[...Array(count)].map( i => (
+        <Skeleton height='55px' />
+      ))}
     </Stack>
   )
 }
