@@ -216,7 +216,7 @@ exports.addUserToGroup = asyncHandler(async (req, res) => {
     await group.save();
     return res.json({
       success: true,
-      msg: `${user.name} added to group ${group.name} successfully!`
+      msg: `${user.name} added to ${group.name} successfully!`
     })
   } catch (err) {
     console.error('error while adding group member, ', err);
@@ -273,7 +273,7 @@ exports.removeUserFromGroup = asyncHandler(async (req, res) => {
     await group.save();
     return res.json({
       success: true,
-      msg: `${user.name} removed from group ${group.name} successfully!`
+      msg: `${user.name} removed from ${group.name} successfully!`
     })
   } catch (err) {
     console.error('error while adding group member, ', err);

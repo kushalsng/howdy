@@ -114,7 +114,7 @@ const Header = () => {
       >
         <Tooltip label='Search Users' hasArrow placement='bottom-end'>
           <Button variant='ghost' onClick={() =>{onOpen(); setSearch('')}}>
-            <i class='fas fa-search'></i>
+            <i className='fas fa-search'></i>
             <Text display={{ base: 'none', md: 'flex' }} px={4}>
               Search User
             </Text>
@@ -124,7 +124,7 @@ const Header = () => {
         <div>
           <Menu>
             <MenuButton p={2} mx={4}>
-              <i class='fa-solid fa-bell'></i>
+              <i className='fa-solid fa-bell'></i>
             </MenuButton>
             <MenuList></MenuList>
           </Menu>
