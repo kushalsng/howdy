@@ -49,6 +49,7 @@ exports.fetchOrCreateChat = asyncHandler(async (req, res) => {
       return res.status(409).json({
         success: false,
         msg: 'Something went wrong!',
+        err,
       });
     }
   }
@@ -87,6 +88,7 @@ exports.fetchChats = asyncHandler(async (req, res) => {
     return res.status(409).json({
       success: false,
       msg: 'Something went wrong!',
+      err,
     });
   }
 });
@@ -129,6 +131,7 @@ exports.addGroupChat = asyncHandler(async (req, res) => {
     return res.status(409).json({
       success: false,
       msg: 'Something went wrong!',
+      err,
     });
   }
 });
@@ -172,6 +175,7 @@ exports.renameGroup = asyncHandler(async (req, res) => {
     return res.status(409).json({
       success: false,
       msg: 'Something went wrong!',
+      err,
     });
   }
 });
@@ -179,50 +183,51 @@ exports.renameGroup = asyncHandler(async (req, res) => {
 exports.addUserToGroup = asyncHandler(async (req, res) => {
   const { chatId, userId } = req.body;
   try {
-    if(!chatId || !userId) {
+    if (!chatId || !userId) {
       return res.status(400).json({
         success: false,
-        msg: "Chat not found!"
-      })
+        msg: 'Chat not found!',
+      });
     }
     const group = await Chat.findOne({
       _id: chatId,
       isGroupChat: true,
-      groupAdmin: req.user._id
+      groupAdmin: req.user._id,
     })
       .populate('users', '-password')
       .populate('groupAdmin', '-password')
       .populate('latestMessage');
-    if(!group){
+    if (!group) {
       return res.status(400).json({
         success: false,
-        msg: "Group not found!"
-      })
+        msg: 'Group not found!',
+      });
     }
-    const user = await User.findById(userId).select("-password");
-    if(!user){
+    const user = await User.findById(userId).select('-password');
+    if (!user) {
       return res.status(400).json({
         success: false,
-        msg: "User not found!"
-      })
+        msg: 'User not found!',
+      });
     }
-    if(group.users.find(user => user._id === userId)){
+    if (group.users.find((user) => user._id === userId)) {
       return res.status(400).json({
         success: false,
-        msg: `User already exist in group ${group.name}`
-      })
+        msg: `User already exist in group ${group.name}`,
+      });
     }
     group.users.push(userId);
     await group.save();
     return res.json({
       success: true,
-      msg: `${user.name} added to ${group.name} successfully!`
-    })
+      msg: `${user.name} added to ${group.name} successfully!`,
+    });
   } catch (err) {
     console.error('error while adding group member, ', err);
     return res.status(409).json({
       success: false,
       msg: 'Something went wrong!',
+      err,
     });
   }
 });
@@ -230,56 +235,57 @@ exports.addUserToGroup = asyncHandler(async (req, res) => {
 exports.removeUserFromGroup = asyncHandler(async (req, res) => {
   const { chatId, userId } = req.body;
   try {
-    if(!chatId || !userId) {
+    if (!chatId || !userId) {
       return res.status(400).json({
         success: false,
-        msg: "Chat not found!"
-      })
+        msg: 'Chat not found!',
+      });
     }
     const group = await Chat.findOne({
       _id: chatId,
       isGroupChat: true,
-      groupAdmin: req.user._id
+      groupAdmin: req.user._id,
     })
       .populate('users', '-password')
       .populate('groupAdmin', '-password')
       .populate('latestMessage');
-    if(!group){
+    if (!group) {
       return res.status(400).json({
         success: false,
-        msg: "Group not found!"
-      })
+        msg: 'Group not found!',
+      });
     }
-    const user = await User.findById(userId).select("-password");
-    if(!user){
+    const user = await User.findById(userId).select('-password');
+    if (!user) {
       return res.status(400).json({
         success: false,
-        msg: "User not found!"
-      })
+        msg: 'User not found!',
+      });
     }
-    if(!group.users.find(user => user._id.toString() === userId)){
+    if (!group.users.find((user) => user._id.toString() === userId)) {
       return res.status(400).json({
         success: false,
-        msg: `${user.name} doesn't exist in ${group.name}`
-      })
+        msg: `${user.name} doesn't exist in ${group.name}`,
+      });
     }
-    if(userId === group.groupAdmin._id.toString()){
+    if (userId === group.groupAdmin._id.toString()) {
       return res.status(400).json({
         success: false,
-        msg: `Cannot remove admin from ${group.name}`
-      })
+        msg: `Cannot remove admin from ${group.name}`,
+      });
     }
-    group.users = group.users.filter(user => user._id.toString() !== userId);
+    group.users = group.users.filter((user) => user._id.toString() !== userId);
     await group.save();
     return res.json({
       success: true,
-      msg: `${user.name} removed from ${group.name} successfully!`
-    })
+      msg: `${user.name} removed from ${group.name} successfully!`,
+    });
   } catch (err) {
     console.error('error while removing group member, ', err);
     return res.status(409).json({
       success: false,
       msg: 'Something went wrong!',
+      err,
     });
   }
 });
@@ -287,43 +293,50 @@ exports.removeUserFromGroup = asyncHandler(async (req, res) => {
 exports.leaveGroup = asyncHandler(async (req, res) => {
   const { chatId } = req.body;
   try {
-    if(!chatId) {
+    if (!chatId) {
       return res.status(400).json({
         success: false,
-        msg: "Chat not found!"
-      })
+        msg: 'Chat not found!',
+      });
     }
     const group = await Chat.findOne({
       _id: chatId,
       isGroupChat: true,
-      groupAdmin: { $ne: req.user._id}
+      groupAdmin: { $ne: req.user._id },
     })
       .populate('users', '-password')
       .populate('groupAdmin', '-password')
       .populate('latestMessage');
-    if(!group){
+    if (!group) {
       return res.status(400).json({
         success: false,
-        msg: "Group not found!"
-      })
+        msg: 'Group not found!',
+      });
     }
-    if(!group.users.find(user => user._id.toString() === req.user._id.toString())){
+    if (
+      !group.users.find(
+        (user) => user._id.toString() === req.user._id.toString()
+      )
+    ) {
       return res.status(400).json({
         success: false,
-        msg: `You're not a member of ${group.name}`
-      })
+        msg: `You're not a member of ${group.name}`,
+      });
     }
-    group.users = group.users.filter(user => user._id.toString() !== req.user._id.toString());
+    group.users = group.users.filter(
+      (user) => user._id.toString() !== req.user._id.toString()
+    );
     await group.save();
     return res.json({
       success: true,
-      msg: `You left ${group.name}!`
-    })
+      msg: `You left ${group.name}!`,
+    });
   } catch (err) {
     console.error('error while leaving group, ', err);
     return res.status(409).json({
       success: false,
       msg: 'Something went wrong!',
+      err,
     });
   }
-})
+});

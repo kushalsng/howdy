@@ -29,6 +29,7 @@ exports.isAuthenticated = asyncHandler(async (req, res, next) => {
     return res.status(409).json({
       success: false,
       msg: 'Something went wrong!',
+      err,
     });
   }
 });

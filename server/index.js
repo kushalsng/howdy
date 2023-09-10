@@ -7,6 +7,7 @@ const cors = require('cors')
 const userRoutes = require('./routes/user.js');
 const authRoutes = require('./routes/auth.js');
 const chatRoutes = require('./routes/chat.js')
+const messageRoutes = require('./routes/message.js')
 const { notFound, errorHandler } = require('./middlewares/error.js');
 const { isAuthenticated } = require('./middlewares/auth.js');
 
@@ -28,6 +29,7 @@ app.use((req, res, next) => {
 app.use('/', authRoutes)
 app.use('/user', userRoutes)
 app.use('/chat', chatRoutes)
+app.use('/message', messageRoutes)
 
 app.use(notFound)
 app.use(errorHandler)
