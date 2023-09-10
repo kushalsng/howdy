@@ -15,6 +15,12 @@ import ProfileModal from '../Modals/ProfileModal';
 import GroupChatModal from '../Modals/GroupChatModal';
 import { getChatMessages, sendMessage } from '../../Helper/message_api_helper';
 import ScrollableChat from './ScrollableChat';
+import '../../assets/styles/styles.css';
+import io from 'socket.io-client';
+import Lottie from 'react-lottie';
+import animationData from '../../assets/animations/typing.json';
+const ENDPOINT = 'http://localhost:5000';
+let socket, selectedChatCompare;
 
 const SingleChat = () => {
   const { user, selectedChat, setSelectedChat } = ChatState();
@@ -22,14 +28,19 @@ const SingleChat = () => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [newMessage, setNewMessage] = useState('');
+  const [isSocketConnected, setSocketConnected] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
 
   const fetchMessages = async () => {
     if (!selectedChat) return;
     try {
       setLoading(true);
       const { data } = await getChatMessages(selectedChat._id);
-      setLoading(false);
       setMessages(data.messages);
+      setLoading(false);
+
+      socket.emit('join chat', selectedChat._id);
     } catch (err) {
       console.error('error while fetching messages: ', err);
       toast({
@@ -46,12 +57,14 @@ const SingleChat = () => {
 
   const sendMessageHandler = async (e) => {
     if (e.key === 'Enter' && newMessage) {
+      socket.emit('stop typing', selectedChat._id);
       try {
         setNewMessage('');
         const { data } = await sendMessage({
           chatId: selectedChat._id,
           content: newMessage,
         });
+        socket.emit('new message', data.message);
         setMessages([...messages, data.message]);
       } catch (err) {
         console.error('error while sending message: ', err);
@@ -69,12 +82,50 @@ const SingleChat = () => {
   };
   const typingHandler = async (e) => {
     setNewMessage(e.target.value);
+    if (!isSocketConnected) return;
 
-    // Typing logic
+    if (!typing) {
+      setTyping(true);
+      socket.emit('typing', selectedChat._id);
+    }
+    const lastTypingTime = new Date().getTime();
+    const timerLength = 3000;
+    setTimeout(() => {
+      const timeNow = new Date().getTime();
+      const timeDiff = timeNow - lastTypingTime;
+
+      if (timeDiff >= timerLength && typing) {
+        socket.emit('stop typing', selectedChat._id);
+        setTyping(false);
+      }
+    }, timerLength);
   };
   useEffect(() => {
+    if (user) {
+      socket = io(ENDPOINT);
+      socket.emit('setup', user);
+      socket.on('connected', () => setSocketConnected(true));
+      socket.on('typing', () => setIsTyping(true));
+      socket.on('stop typing', () => setIsTyping(false));
+    }
+  }, [user]);
+  useEffect(() => {
     fetchMessages();
+    selectedChatCompare = selectedChat;
   }, [selectedChat]);
+
+  useEffect(() => {
+    socket.on('message received', (receivedMessage) => {
+      if (
+        !selectedChatCompare ||
+        selectedChatCompare._id !== receivedMessage.chat._id
+      ) {
+        // send notification
+      } else {
+        setMessages([...messages, receivedMessage]);
+      }
+    });
+  });
   return (
     <React.Fragment>
       {selectedChat ? (
@@ -133,6 +184,24 @@ const SingleChat = () => {
               </div>
             )}
             <FormControl onKeyDown={sendMessageHandler} isRequired mt={3}>
+              {isTyping ? (
+                <div>
+                  <Lottie
+                    options={{
+                      loop: true,
+                      autoplay: true,
+                      animationData: animationData,
+                      rendererSettings: {
+                        preserveAspectRatio: 'xMidYMid slice',
+                      },
+                    }}
+                    width={70}
+                    style={{ marginBottom: 15, marginLeft: 0 }}
+                  />
+                </div>
+              ) : (
+                <></>
+              )}
               <Input
                 variant='filled'
                 bg='#E8E8E8'
