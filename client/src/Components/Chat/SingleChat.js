@@ -1,13 +1,80 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChatState } from '../../Context/ChatProvider';
-import { Box, IconButton, Text } from '@chakra-ui/react';
+import {
+  Box,
+  FormControl,
+  IconButton,
+  Input,
+  Spinner,
+  Text,
+  useToast,
+} from '@chakra-ui/react';
 import { ArrowBackIcon, ViewIcon } from '@chakra-ui/icons';
-import { getReceiver } from '../../utils/getReceiver';
-import ProfileModal from '../Modals/ProfileModal'
+import { getReceiver } from '../../utils/chat';
+import ProfileModal from '../Modals/ProfileModal';
 import GroupChatModal from '../Modals/GroupChatModal';
+import { getChatMessages, sendMessage } from '../../Helper/message_api_helper';
+import ScrollableChat from './ScrollableChat';
 
 const SingleChat = () => {
   const { user, selectedChat, setSelectedChat } = ChatState();
+  const toast = useToast();
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [newMessage, setNewMessage] = useState('');
+
+  const fetchMessages = async () => {
+    if (!selectedChat) return;
+    try {
+      setLoading(true);
+      const { data } = await getChatMessages(selectedChat._id);
+      setLoading(false);
+      setMessages(data.messages);
+    } catch (err) {
+      console.error('error while fetching messages: ', err);
+      toast({
+        title: 'Unable to fetch messages!',
+        description: err.response.data.msg,
+        status: 'error',
+        duration: 4000,
+        isClosable: true,
+        position: 'bottom',
+        variant: 'left-accent',
+      });
+    }
+  };
+
+  const sendMessageHandler = async (e) => {
+    if (e.key === 'Enter' && newMessage) {
+      try {
+        setNewMessage('');
+        const { data } = await sendMessage({
+          chatId: selectedChat._id,
+          content: newMessage,
+        });
+        setMessages([...messages, data.message]);
+      } catch (err) {
+        console.error('error while sending message: ', err);
+        toast({
+          title: 'Unable to send message',
+          description: err.response.data.msg,
+          status: 'error',
+          duration: 4000,
+          isClosable: true,
+          position: 'bottom',
+          variant: 'left-accent',
+        });
+      }
+    }
+  };
+  const typingHandler = async (e) => {
+    setNewMessage(e.target.value);
+
+    // Typing logic
+  };
+  useEffect(() => {
+    fetchMessages();
+  }, [selectedChat]);
   return (
     <React.Fragment>
       {selectedChat ? (
@@ -36,23 +103,44 @@ const SingleChat = () => {
               <>
                 {selectedChat.name.toUpperCase()}
                 <GroupChatModal isUpdate={true}>
-                  <IconButton display={{base: "flex"}} icon={<ViewIcon />} />
+                  <IconButton display={{ base: 'flex' }} icon={<ViewIcon />} />
                 </GroupChatModal>
               </>
             )}
           </Text>
           <Box
-            display="flex"
-            flexDir="column"
-            justifyContent="flex-end"
+            display='flex'
+            flexDir='column'
+            justifyContent='flex-end'
             p={3}
-            bg="#E8E8E8"
-            w="100%"
-            h="100%"
-            borderRadius="hidden"
-            overflowY="hidden"
+            bg='#E8E8E8'
+            w='100%'
+            h='100%'
+            borderRadius='hidden'
+            overflowY='hidden'
           >
-            {/* Messages Here  */}
+            {loading ? (
+              <Spinner
+                size='xl'
+                w={20}
+                h={20}
+                alignSelf='center'
+                margin='auto'
+              />
+            ) : (
+              <div className='messages'>
+                <ScrollableChat messages={messages} />
+              </div>
+            )}
+            <FormControl onKeyDown={sendMessageHandler} isRequired mt={3}>
+              <Input
+                variant='filled'
+                bg='#E8E8E8'
+                placeholder='Write a message...'
+                onChange={typingHandler}
+                value={newMessage}
+              />
+            </FormControl>
           </Box>
         </>
       ) : (

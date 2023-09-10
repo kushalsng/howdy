@@ -4,7 +4,7 @@ import { Box, Button, Stack, Text, useToast } from '@chakra-ui/react';
 import { fetchChats } from '../../Helper/chat_api_helper';
 import { AddIcon } from '@chakra-ui/icons';
 import ListLoading from '../Loaders/ListLoading';
-import { getReceiver } from '../../utils/getReceiver';
+import { getReceiver } from '../../utils/chat';
 import GroupChatModal from '../Modals/GroupChatModal';
 
 const MyChats = () => {
@@ -16,9 +16,9 @@ const MyChats = () => {
       const { data } = await fetchChats();
       setChats(data.chats);
     } catch (err) {
-      console.error('error while sign up: ', err);
+      console.error('error while fetching chats: ', err);
       toast({
-        title: 'Unable to Sign Up',
+        title: 'Unable to get your chats!',
         description: err.response.data.msg,
         status: 'error',
         duration: 4000,
@@ -26,7 +26,6 @@ const MyChats = () => {
         position: 'bottom',
         variant: 'left-accent',
       });
-      // setLoading(false);
     }
   };
   useEffect(() => {
