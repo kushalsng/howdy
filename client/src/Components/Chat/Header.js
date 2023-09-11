@@ -12,7 +12,6 @@ import {
   useDisclosure,
   Drawer,
   DrawerBody,
-  DrawerFooter,
   DrawerHeader,
   DrawerOverlay,
   DrawerContent,
@@ -21,17 +20,20 @@ import {
   useToast,
   Spinner,
 } from '@chakra-ui/react';
-import { ChevronDownIcon } from '@chakra-ui/icons';
+import { BellIcon, ChevronDownIcon } from '@chakra-ui/icons';
 import React, { useEffect, useState } from 'react';
 import Howdy from '../Howdy';
 import { ChatState } from '../../Context/ChatProvider';
 import ProfileModal from '../Modals/ProfileModal';
 import { useNavigate } from 'react-router-dom';
-import { getAllUsers } from '../../Helper/user_api_helper'
+import { getAllUsers } from '../../Helper/user_api_helper';
 import ListLoading from '../Loaders/ListLoading';
 import UserListItem from '../User/UserListItem';
-import { fetchOrCreateChat } from '../../Helper/chat_api_helper'
+import { fetchOrCreateChat } from '../../Helper/chat_api_helper';
 import { debounce } from '../../utils/debounce';
+import { getReceiver } from '../../utils/chat';
+import NotificationBadge from 'react-notification-badge';
+import { Effect } from 'react-notification-badge';
 
 const Header = () => {
   const [search, setSearch] = useState('');
@@ -39,9 +41,17 @@ const Header = () => {
   const [loading, setLoading] = useState(false);
   const [loadingChat, setLoadingChat] = useState(false);
 
-  const { user, setUser, selectedChat, setSelectedChat, chats, setChats } = ChatState();
+  const {
+    user,
+    setUser,
+    notifications,
+    setNotifications,
+    setSelectedChat,
+    chats,
+    setChats,
+  } = ChatState();
   const navigate = useNavigate();
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
   const logoutHandler = () => {
@@ -53,13 +63,13 @@ const Header = () => {
   const accessChat = async (userId) => {
     try {
       setLoadingChat(true);
-      const { data } = await fetchOrCreateChat({userId});
-      if(!chats.find(chat => chat._id === data.chat._id)){
+      const { data } = await fetchOrCreateChat({ userId });
+      if (!chats.find((chat) => chat._id === data.chat._id)) {
         setChats([data.chat, ...chats]);
       }
       setLoadingChat(false);
       setSelectedChat(data.chat);
-      onClose()
+      onClose();
     } catch (err) {
       console.error('error while fetching chat: ', err);
       toast({
@@ -73,7 +83,7 @@ const Header = () => {
       });
       setLoadingChat(false);
     }
-  }
+  };
   const onSearch = debounce(async function () {
     try {
       setLoading(true);
@@ -93,14 +103,13 @@ const Header = () => {
       });
       setLoading(false);
     }
-  }, 300)
-
+  }, 300);
 
   useEffect(() => {
-    if(isOpen){
+    if (isOpen) {
       onSearch();
     }
-  }, [isOpen, search])
+  }, [isOpen, search]);
   return (
     <>
       <Box
@@ -113,7 +122,13 @@ const Header = () => {
         borderWidth='5px'
       >
         <Tooltip label='Search Users' hasArrow placement='bottom-end'>
-          <Button variant='ghost' onClick={() =>{onOpen(); setSearch('')}}>
+          <Button
+            variant='ghost'
+            onClick={() => {
+              onOpen();
+              setSearch('');
+            }}
+          >
             <i className='fas fa-search'></i>
             <Text display={{ base: 'none', md: 'flex' }} px={4}>
               Search User
@@ -124,9 +139,42 @@ const Header = () => {
         <div>
           <Menu>
             <MenuButton p={2} mx={4}>
-              <i className='fa-solid fa-bell'></i>
+              <NotificationBadge
+                count={notifications.length}
+                effect={Effect.SCALE}
+              />
+              <BellIcon />
             </MenuButton>
-            <MenuList></MenuList>
+            <MenuList px={2}>
+              {!notifications.length ? (
+                'No New Notifications'
+              ) : (
+                <>
+                  {notifications.map((notification, index) => (
+                    <MenuItem
+                      key={index}
+                      cursor='pointer'
+                      onClick={() => {
+                        setSelectedChat(notification);
+                        setNotifications(
+                          notifications.filter(
+                            (notif) => notif._id !== notification._id
+                          )
+                        );
+                      }}
+                    >
+                      {notification.isGroupChat
+                        ? `${notification.count} New Message${
+                            notification.count > 1 ? 's' : ''
+                          } in ${notification.name}`
+                        : `${notification.count} New Message${
+                            notification.count > 1 ? 's' : ''
+                          } from ${getReceiver(user, notification.users).name}`}
+                    </MenuItem>
+                  ))}
+                </>
+              )}
+            </MenuList>
           </Menu>
           <Menu>
             <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
@@ -149,18 +197,14 @@ const Header = () => {
         </div>
       </Box>
 
-      <Drawer
-        isOpen={isOpen}
-        placement='left'
-        onClose={onClose}
-      >
+      <Drawer isOpen={isOpen} placement='left' onClose={onClose}>
         <DrawerOverlay />
         <DrawerContent>
           <DrawerCloseButton />
-          <DrawerHeader borderBottomWidth="1px">Start a Chat</DrawerHeader>
+          <DrawerHeader borderBottomWidth='1px'>Start a Chat</DrawerHeader>
 
           <DrawerBody>
-            <Box display="flex" pb={2}>
+            <Box display='flex' pb={2}>
               <Input
                 placeholder='Find them here...'
                 mr={2}
@@ -170,7 +214,7 @@ const Header = () => {
             </Box>
             {loading ? (
               <ListLoading />
-            ): (
+            ) : (
               userList?.map((user, index) => (
                 <UserListItem
                   key={index}
@@ -179,9 +223,10 @@ const Header = () => {
                 />
               ))
             )}
-            {loadingChat && <Spinner ml="auto" display="flex" justifyContent="center" />}
+            {loadingChat && (
+              <Spinner ml='auto' display='flex' justifyContent='center' />
+            )}
           </DrawerBody>
-
         </DrawerContent>
       </Drawer>
     </>
