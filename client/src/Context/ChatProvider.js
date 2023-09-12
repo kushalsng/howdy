@@ -14,6 +14,10 @@ const ChatProvider = ({ children }) => {
     setUser(userData);
     if(!userData){
       navigate('/');
+      setChats(null);
+      setUser(null);
+      setSelectedChat(null);
+      setNotifications(null);
     }
   }, [])
   return (

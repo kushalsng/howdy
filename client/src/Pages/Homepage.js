@@ -12,13 +12,16 @@ import LogIn from '../Components/Auth/LogIn';
 import SignUp from '../Components/Auth/SignUp';
 import { useNavigate } from 'react-router-dom';
 import Howdy from '../Components/Howdy';
+import { ChatState } from '../Context/ChatProvider';
 
 const Homepage = () => {
+  const { setUser } = ChatState()
   const navigate = useNavigate();
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user"));
     if(userData){
+      setUser(userData);
       navigate('/chats');
     }
   }, [])

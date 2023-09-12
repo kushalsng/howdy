@@ -1,11 +1,12 @@
 import axios from 'axios';
 const baseURL = 'https://howdy-rvua.onrender.com';
 // const baseURL = 'http://localhost:5000';
-const token = localStorage.getItem("token")
+
 
 axios.interceptors.request.use((request) => {
   request.baseURL = baseURL;
   request.headers['Content-type'] = 'application/json';
+  const token = localStorage.getItem("token");
   if(token){
     request.headers['Authorization'] = `Bearer ${token}`;
   }

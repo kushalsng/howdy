@@ -11,8 +11,10 @@ import {
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../../Helper/auth_api_helper';
+import { ChatState } from '../../Context/ChatProvider';
 
 const SignUp = () => {
+  const { setUser } = ChatState();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -60,6 +62,7 @@ const SignUp = () => {
         position: 'bottom',
         variant: 'left-accent',
       });
+      setUser(data.user);
       localStorage.setItem('user', JSON.stringify(data.user));
       localStorage.setItem('token',data.token);
       setLoading(false);

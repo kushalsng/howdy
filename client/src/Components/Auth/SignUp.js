@@ -9,11 +9,12 @@ import {
   VStack,
   useToast,
 } from '@chakra-ui/react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { register } from '../../Helper/auth_api_helper';
+import { ChatState } from '../../Context/ChatProvider';
 
 const SignUp = () => {
+  const { setUser } = ChatState();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -124,6 +125,7 @@ const SignUp = () => {
         position: 'bottom',
         variant: 'left-accent',
       });
+      setUser(data.user);
       localStorage.setItem('user', JSON.stringify(data.user));
       localStorage.setItem('token', data.token);
       setLoading(false);

@@ -8,29 +8,7 @@ import { getReceiver } from '../../utils/chat';
 import GroupChatModal from '../Modals/GroupChatModal';
 
 const MyChats = () => {
-  const { selectedChat, setSelectedChat, user, chats, setChats } = ChatState();
-  const toast = useToast();
-
-  const fetchUserChats = async () => {
-    try {
-      const { data } = await fetchChats();
-      setChats(data.chats);
-    } catch (err) {
-      console.error('error while fetching chats: ', err);
-      toast({
-        title: 'Unable to get your chats!',
-        description: err.response.data.msg,
-        status: 'error',
-        duration: 4000,
-        isClosable: true,
-        position: 'bottom',
-        variant: 'left-accent',
-      });
-    }
-  };
-  useEffect(() => {
-    fetchUserChats();
-  }, []);
+  const { selectedChat, setSelectedChat, user, chats } = ChatState();
   return (
     <Box
       display={{ base: selectedChat ? 'none' : 'flex', md: 'flex' }}

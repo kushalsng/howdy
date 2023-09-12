@@ -48,7 +48,7 @@ const Header = () => {
     setNotifications,
     setSelectedChat,
     chats,
-    setChats,
+    setChats
   } = ChatState();
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -57,7 +57,10 @@ const Header = () => {
   const logoutHandler = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('token');
+    setChats(null);
     setUser(null);
+    setSelectedChat(null);
+    setNotifications(null);
     navigate('/');
   };
   const accessChat = async (userId) => {
@@ -140,24 +143,24 @@ const Header = () => {
           <Menu>
             <MenuButton p={2} mx={4}>
               <NotificationBadge
-                count={notifications.length}
+                count={notifications?.length}
                 effect={Effect.SCALE}
               />
               <BellIcon />
             </MenuButton>
             <MenuList px={2}>
-              {!notifications.length ? (
+              {!notifications?.length ? (
                 'No New Notifications'
               ) : (
                 <>
-                  {notifications.map((notification, index) => (
+                  {notifications?.map((notification, index) => (
                     <MenuItem
                       key={index}
                       cursor='pointer'
                       onClick={() => {
                         setSelectedChat(notification);
                         setNotifications(
-                          notifications.filter(
+                          notifications?.filter(
                             (notif) => notif._id !== notification._id
                           )
                         );
