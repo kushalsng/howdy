@@ -13,10 +13,7 @@ const { isAuthenticated } = require('./middlewares/auth.js');
 const socket = require('socket.io');
 
 const app = express();
-app.use(cors({
-  // origin: "http://localhost:3000"
-  origin: "https://howdy-there.onrender.com"
-}));
+app.use(cors());
 connectDB();
 
 app.use(express.json());
