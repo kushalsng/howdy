@@ -32,6 +32,12 @@ app.use((req, res, next) => {
   }
 });
 
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    msg: "Howdy👋🏻 server running successfully"
+  })
+})
 app.use('/', authRoutes);
 app.use('/user', userRoutes);
 app.use('/chat', chatRoutes);
