@@ -19,7 +19,8 @@ import '../../assets/styles/styles.css';
 import io from 'socket.io-client';
 import Lottie from 'react-lottie';
 import animationData from '../../assets/animations/typing.json';
-const ENDPOINT = 'http://localhost:5000';
+const ENDPOINT = 'https://howdy-rvua.onrender.com';
+// const ENDPOINT = 'http://localhost:5000';
 let socket, selectedChatCompare;
 
 const SingleChat = () => {
