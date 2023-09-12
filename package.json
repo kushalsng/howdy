@@ -1,0 +1,24 @@
+{
+  "name": "howdy-chat-app",
+  "version": "1.0.0",
+  "description": "<!DOCTYPE html>\r <html lang=\"en\">\r <head>\r     <meta charset=\"UTF-8\">\r     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\r </head>\r <body>\r     <h1>Howdy - Real Time Chat Application</h1>\r     <p>Welcome to the Howdy repository! Howdy is a real-time chat application built on React, Chakra UI, and Node.js. This application allows users to engage in one-to-one as well as group chats and also supports notification features to keep users informed of new messages.</p>\r     <h2>Features</h2>\r     <ul>\r         <li><strong>One-to-One Chat:</strong> Users can initiate one-to-one conversations with other registered users. Messages are delivered in real-time, providing a seamless chatting experience.</li>\r         <li><strong>Group Chat:</strong> Howdy supports group chats, allowing users to create or join existing groups to chat with multiple participants simultaneously.</li>\r         <li><strong>Real-Time Communication:</strong> The application utilizes WebSockets to enable real-time communication between users, ensuring instant message delivery.</li>\r         <li><strong>Notification Feature:</strong> Users receive notifications for new messages, ensuring they stay up-to-date with ongoing conversations.</li>\r     </ul>\r     <h2>Installation</h2>\r     <p>To set up the Howdy application, follow these steps:</p>\r     <ol>\r         <li>Clone the repository to your local machine:</li>\r         <pre><code>git clone https://github.com/your-username/Howdy.git</code></pre>\r         <li>Change to the project directory:</li>\r         <pre><code>cd Howdy</code></pre>\r         <li>Install the dependencies for the React frontend:</li>\r         <pre><code>cd client\r npm install</code></pre>\r         <li>Install the dependencies for the Node.js backend:</li>\r         <pre><code>cd ../server\r npm install</code></pre>\r         <li>Configure the backend settings:</li>\r         <ul>\r             <li>Rename the <code>.env.example</code> file in the <code>server</code> directory to <code>.env</code>.</li>\r             <li>Update the <code>.env</code> file with your preferred configurations, such as database settings and WebSocket settings.</li>\r         </ul>\r         <li>Start the frontend and backend servers:</li>\r         <pre><code># In the client directory:\r npm start",
+  "main": "index.js",
+  "scripts": {
+    "install-server": "cd server && npm install",
+    "start-server": "cd server && node index.js",
+    "install-client": "cd client && npm install",
+    "build-client": "cd client && npm run build",
+    "start-client": "cd client && npm run start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kushalsng/howdy.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kushalsng/howdy/issues"
+  },
+  "homepage": "https://github.com/kushalsng/howdy#readme"
+}
