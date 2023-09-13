@@ -79,7 +79,9 @@ const MyChats = () => {
                       >
                         {chat.latestMessage
                           ? ` ${
-                              chat.isGroupChat
+                              chat.latestMessage.sender === user._id
+                                ? 'You: '
+                                : chat.isGroupChat
                                 ? chat.users
                                     .find(
                                       (user) =>
