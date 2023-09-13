@@ -72,7 +72,6 @@ exports.getAllMessages = asyncHandler(async (req, res) => {
     // and if user is a member of chat or not
     const chat = await Chat.findOne({
       _id: chatId,
-      isGroupChat: false,
       users: { $elemMatch: { $eq: req.user._id } },
     })
     if(!chat) {

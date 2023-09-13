@@ -143,7 +143,7 @@ const Header = () => {
           <Menu>
             <MenuButton p={2} mx={4}>
               <NotificationBadge
-                count={notifications?.length}
+                count={notifications ? notifications.reduce((count, notif) => (count + notif.count), 0) : 0}
                 effect={Effect.SCALE}
               />
               <BellIcon />

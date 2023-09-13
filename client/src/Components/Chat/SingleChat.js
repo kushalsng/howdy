@@ -121,7 +121,7 @@ const SingleChat = () => {
         !selectedChatCompare ||
         selectedChatCompare._id !== receivedMessage.chat._id
       ) {
-        if(!notifications.includes(receivedMessage)) {
+        if(notifications && !notifications.includes(receivedMessage)) {
           const receivedMsgChat = receivedMessage.chat;
           const foundChat = notifications.find(notif => notif._id === receivedMsgChat._id);
           if(foundChat) {
