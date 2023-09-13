@@ -219,6 +219,8 @@ const SingleChat = () => {
                 placeholder='Write a message...'
                 onChange={typingHandler}
                 value={newMessage}
+                border={{base: "0.5px solid lightgrey"}}
+                _focus={{borderWidth: "2px"}}
               />
             </FormControl>
           </Box>

@@ -59,6 +59,7 @@ const io = socket(server, {
 });
 
 io.on('connection', (socket) => {
+  let roomId;
   console.log('Socket connected!'.brightBlue.bold);
   socket.on('setup', (userData) => {
     socket.join(userData._id);
@@ -67,7 +68,12 @@ io.on('connection', (socket) => {
   });
 
   socket.on('join chat', (room) => {
+    if(roomId){
+      socket.leave(roomId);
+      console.log('User left room: ', roomId);
+    }
     socket.join(room);
+    roomId = room;
     console.log('User joined room: ', room);
   });
 
