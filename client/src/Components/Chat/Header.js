@@ -43,12 +43,12 @@ const Header = () => {
 
   const {
     user,
-    setUser,
     notifications,
     setNotifications,
     setSelectedChat,
     chats,
-    setChats
+    setChats,
+    setIsLoggedOut
   } = ChatState();
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -57,10 +57,7 @@ const Header = () => {
   const logoutHandler = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('token');
-    setChats(null);
-    setUser(null);
-    setSelectedChat(null);
-    setNotifications(null);
+    setIsLoggedOut(true);
     navigate('/');
   };
   const accessChat = async (userId) => {

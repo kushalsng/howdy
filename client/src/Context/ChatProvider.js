@@ -8,20 +8,26 @@ const ChatProvider = ({ children }) => {
   const [selectedChat, setSelectedChat] = useState(null)
   const [chats, setChats] = useState([])
   const [notifications, setNotifications] = useState([])
+  const [isLoggedOut, setIsLoggedOut] = useState(true)
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user"));
     setUser(userData);
-    if(!userData){
+    if(userData){
+      setIsLoggedOut(false);
+    } 
+  }, [])
+  useEffect(() => {
+    if(isLoggedOut){
       navigate('/');
       setChats(null);
       setUser(null);
       setSelectedChat(null);
-      setNotifications(null);
+      setNotifications([]);
     }
-  }, [])
+  }, [isLoggedOut])
   return (
-    <ChatContext.Provider value={{ user, setUser, selectedChat, setSelectedChat, chats, setChats, notifications, setNotifications}}>
+    <ChatContext.Provider value={{ user, setUser, selectedChat, setSelectedChat, chats, setChats, notifications, setNotifications, isLoggedOut, setIsLoggedOut}}>
       {children}
     </ChatContext.Provider>
   )

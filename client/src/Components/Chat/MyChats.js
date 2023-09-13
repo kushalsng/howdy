@@ -1,7 +1,6 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { ChatState } from '../../Context/ChatProvider';
-import { Box, Button, Stack, Text, useToast } from '@chakra-ui/react';
-import { fetchChats } from '../../Helper/chat_api_helper';
+import { Box, Button, Stack, Text } from '@chakra-ui/react';
 import { AddIcon } from '@chakra-ui/icons';
 import ListLoading from '../Loaders/ListLoading';
 import { getReceiver } from '../../utils/chat';
@@ -53,26 +52,62 @@ const MyChats = () => {
         overflowY='hidden'
       >
         {chats ? (
-          <Stack overflowY='scroll'>
-            {chats.map((chat) => (
+          <>
+            {chats.filter((chat) => chat.latestMessage).length ? (
+              <Stack overflowY='scroll'>
+                {chats
+                  .filter((chat) => chat.latestMessage)
+                  .map((chat) => (
+                    <Box
+                      onClick={() => setSelectedChat(chat)}
+                      cursor='pointer'
+                      bg={selectedChat === chat ? '#38B2AC' : '#E8E8E8'}
+                      color={selectedChat === chat ? 'white' : 'black'}
+                      px={3}
+                      py={2}
+                      borderRadius='lg'
+                      key={chat._id}
+                    >
+                      <Text>
+                        {!chat.isGroupChat
+                          ? getReceiver(user, chat.users).name
+                          : chat.name}
+                      </Text>
+                      <Text
+                        textOverflow='ellipsis'
+                        color={selectedChat === chat ? '#353535' : '#595959'}
+                      >
+                        {chat.latestMessage
+                          ? ` ${
+                              chat.isGroupChat
+                                ? chat.users
+                                    .find(
+                                      (user) =>
+                                        user._id === chat.latestMessage.sender
+                                    )
+                                    .name.split(' ')[0] + ': '
+                                : ''
+                            }${chat.latestMessage.content}`
+                          : ''}
+                      </Text>
+                    </Box>
+                  ))}
+              </Stack>
+            ) : (
               <Box
-                onClick={() => setSelectedChat(chat)}
-                cursor='pointer'
-                bg={selectedChat === chat ? '#38B2AC' : '#E8E8E8'}
-                color={selectedChat === chat ? 'white' : 'black'}
+                bg={'#E8E8E8'}
+                color={'black'}
                 px={3}
                 py={2}
                 borderRadius='lg'
-                key={chat._id}
               >
-                <Text>
-                  {!chat.isGroupChat
-                    ? getReceiver(user, chat.users).name
-                    : chat.name}
+                <Text>Howdy {user ? user.name?.split(' ')[0] : ''}👋🏻</Text>
+                <Text textOverflow='ellipsis' color='grey'>
+                  Start a conversation with someone
                 </Text>
               </Box>
-            ))}
-          </Stack>
+            )}
+          </>
         ) : (
           <ListLoading />
         )}
