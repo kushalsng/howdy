@@ -24,7 +24,15 @@ const ENDPOINT = 'https://howdy-rvua.onrender.com';
 let socket, selectedChatCompare;
 
 const SingleChat = () => {
-  const { user, selectedChat, setSelectedChat, notifications, setNotifications } = ChatState();
+  const {
+    user,
+    selectedChat,
+    setSelectedChat,
+    notifications,
+    setNotifications,
+    chats,
+    setChats,
+  } = ChatState();
   const toast = useToast();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -67,7 +75,7 @@ const SingleChat = () => {
         });
         socket.emit('new message', data.message);
         setMessages([...messages, data.message]);
-      } catch (err) {
+              } catch (err) {
         console.error('error while sending message: ', err);
         toast({
           title: 'Unable to send message',
@@ -122,19 +130,21 @@ const SingleChat = () => {
         !selectedChatCompare ||
         selectedChatCompare._id !== receivedMessage.chat._id
       ) {
-        if(notifications && !notifications.includes(receivedMessage)) {
+        if (notifications && !notifications.includes(receivedMessage)) {
           const receivedMsgChat = receivedMessage.chat;
-          const foundChat = notifications.find(notif => notif._id === receivedMsgChat._id);
-          if(foundChat) {
+          const foundChat = notifications.find(
+            (notif) => notif._id === receivedMsgChat._id
+          );
+          if (foundChat) {
             foundChat.count++;
-            setNotifications([...notifications])
+            setNotifications([...notifications]);
           } else {
-            receivedMsgChat.count =1;
+            receivedMsgChat.count = 1;
             setNotifications([receivedMsgChat, ...notifications]);
           }
         }
       } else {
-        setMessages([...messages, receivedMessage]);
+                setMessages([...messages, receivedMessage]);
       }
     });
   });
@@ -220,8 +230,8 @@ const SingleChat = () => {
                 placeholder='Write a message...'
                 onChange={typingHandler}
                 value={newMessage}
-                border={{base: "0.5px solid lightgrey"}}
-                _focus={{borderWidth: "2px"}}
+                border={{ base: '0.5px solid lightgrey' }}
+                _focus={{ borderWidth: '2px' }}
               />
             </FormControl>
           </Box>

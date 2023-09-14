@@ -12,7 +12,12 @@ import GroupChatModal from '../Modals/GroupChatModal';
 import { DateTime } from 'luxon';
 
 const MyChats = () => {
-  const { selectedChat, setSelectedChat, user, chats } = ChatState();
+  const {
+    selectedChat,
+    setSelectedChat,
+    user: loggedInUser,
+    chats,
+  } = ChatState();
   return (
     <Box
       display={{ base: selectedChat ? 'none' : 'flex', md: 'flex' }}
@@ -58,10 +63,11 @@ const MyChats = () => {
       >
         {chats ? (
           <>
-            {chats.filter((chat) => chat.latestMessage).length ? (
+            {chats.filter((chat) => chat.latestMessage || chat.isGroupChat)
+              .length ? (
               <Stack overflowY='scroll'>
                 {chats
-                  .filter((chat) => chat.latestMessage)
+                  .filter((chat) => chat.latestMessage || chat.isGroupChat)
                   .map((chat) => (
                     <Box
                       onClick={() => setSelectedChat(chat)}
@@ -77,24 +83,35 @@ const MyChats = () => {
                         <Box>
                           <span className='text-wrapper'>
                             {!chat.isGroupChat
-                              ? getReceiver(user, chat.users).name
+                              ? getReceiver(loggedInUser, chat.users).name
                               : chat.name}
                           </span>
                           <span
                             style={{
                               fontSize: '0.7rem',
-                              color: '#595959',
+                              color:
+                                selectedChat?._id === chat._id
+                                  ? '#353535'
+                                  : '#595959',
                               float: 'right',
                               marginTop: '5px',
                             }}
                           >
-                            {isYesterday(chat.latestMessage.updatedAt)
+                            {isYesterday(
+                              chat.latestMessage
+                                ? chat.latestMessage.updatedAt
+                                : chat.updatedAt
+                            )
                               ? 'Yesterday'
                               : DateTime.fromISO(
-                                  chat.latestMessage.updatedAt
+                                  chat.latestMessage
+                                    ? chat.latestMessage.updatedAt
+                                    : chat.updatedAt
                                 ).toFormat(
                                   isDayBeforeYesterday(
-                                    chat.latestMessage.updatedAt
+                                    chat.latestMessage
+                                      ? chat.latestMessage.updatedAt
+                                      : chat.updatedAt
                                   )
                                     ? 'd/M/yyyy'
                                     : 'T'
@@ -104,11 +121,13 @@ const MyChats = () => {
                       </Text>
                       <Text
                         className='text-wrapper'
-                        color={selectedChat === chat ? '#353535' : '#595959'}
+                        color={
+                          selectedChat?._id === chat._id ? '#353535' : '#595959'
+                        }
                       >
                         {chat.latestMessage
                           ? ` ${
-                              chat.latestMessage.sender === user._id
+                              chat.latestMessage.sender === loggedInUser._id
                                 ? 'You: '
                                 : chat.isGroupChat
                                 ? chat.users
@@ -116,10 +135,12 @@ const MyChats = () => {
                                       (user) =>
                                         user._id === chat.latestMessage.sender
                                     )
-                                    .name.split(' ')[0] + ': '
+                                    ?.name.split(' ')[0] + ': '
                                 : ''
                             }${chat.latestMessage.content}`
-                          : ''}
+                          : `${
+                              chat.groupAdmin.name.split(' ')[0]
+                            } created the group`}
                       </Text>
                     </Box>
                   ))}
@@ -132,7 +153,9 @@ const MyChats = () => {
                 py={2}
                 borderRadius='lg'
               >
-                <Text>Howdy {user ? user.name?.split(' ')[0] : ''}👋🏻</Text>
+                <Text>
+                  Howdy {loggedInUser ? loggedInUser.name?.split(' ')[0] : ''}👋🏻
+                </Text>
                 <Text className='text-wrapper' color='grey'>
                   Start a conversation with someone
                 </Text>
