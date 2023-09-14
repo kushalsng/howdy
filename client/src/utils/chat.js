@@ -43,7 +43,6 @@ export const isSameUser = (messages, message, index) => {
 };
 
 export const isYesterday = (dateTime) => {
-  console.log(DateTime.now().minus({ days: 1 }).toISO());
   return (
     DateTime.now().minus({ days: 1 }).toFormat('dd/MM/yyyy') ===
     DateTime.fromISO(dateTime).toFormat('dd/MM/yyyy')
