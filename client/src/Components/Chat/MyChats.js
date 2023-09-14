@@ -3,8 +3,13 @@ import { ChatState } from '../../Context/ChatProvider';
 import { Box, Button, Stack, Text } from '@chakra-ui/react';
 import { AddIcon } from '@chakra-ui/icons';
 import ListLoading from '../Loaders/ListLoading';
-import { getReceiver } from '../../utils/chat';
+import {
+  getReceiver,
+  isDayBeforeYesterday,
+  isYesterday,
+} from '../../utils/chat';
 import GroupChatModal from '../Modals/GroupChatModal';
+import { DateTime } from 'luxon';
 
 const MyChats = () => {
   const { selectedChat, setSelectedChat, user, chats } = ChatState();
@@ -69,12 +74,36 @@ const MyChats = () => {
                       key={chat._id}
                     >
                       <Text>
-                        {!chat.isGroupChat
-                          ? getReceiver(user, chat.users).name
-                          : chat.name}
+                        <Box>
+                          <span className='text-wrapper'>
+                            {!chat.isGroupChat
+                              ? getReceiver(user, chat.users).name
+                              : chat.name}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: '0.7rem',
+                              color: '#595959',
+                              float: 'right',
+                              marginTop: '5px',
+                            }}
+                          >
+                            {isYesterday(chat.latestMessage.updatedAt)
+                              ? 'Yesterday'
+                              : DateTime.fromISO(
+                                  chat.latestMessage.updatedAt
+                                ).toFormat(
+                                  isDayBeforeYesterday(
+                                    chat.latestMessage.updatedAt
+                                  )
+                                    ? 'd/M/yyyy'
+                                    : 'T'
+                                )}
+                          </span>
+                        </Box>
                       </Text>
                       <Text
-                        textOverflow='ellipsis'
+                        className='text-wrapper'
                         color={selectedChat === chat ? '#353535' : '#595959'}
                       >
                         {chat.latestMessage
@@ -104,7 +133,7 @@ const MyChats = () => {
                 borderRadius='lg'
               >
                 <Text>Howdy {user ? user.name?.split(' ')[0] : ''}👋🏻</Text>
-                <Text textOverflow='ellipsis' color='grey'>
+                <Text className='text-wrapper' color='grey'>
                   Start a conversation with someone
                 </Text>
               </Box>

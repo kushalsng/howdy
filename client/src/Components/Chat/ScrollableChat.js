@@ -7,7 +7,8 @@ import {
   sameSenderMargin,
 } from '../../utils/chat';
 import { ChatState } from '../../Context/ChatProvider';
-import { Avatar } from '@chakra-ui/react';
+import { Avatar, Box } from '@chakra-ui/react';
+import { DateTime } from 'luxon';
 
 const ScrollableChat = ({ messages }) => {
   const { user } = ChatState();
@@ -45,7 +46,19 @@ const ScrollableChat = ({ messages }) => {
                   : 10,
               }}
             >
-              {message.content}
+              <Box>
+                <span>{message.content}</span>
+                <span
+                  style={{
+                    fontSize: '0.65rem',
+                    color: '#595959',
+                    float: 'right',
+                    margin: '10px 0px 0px 5px',
+                  }}
+                >
+                  {DateTime.fromISO(message.updatedAt).toFormat('T')}
+                </span>
+              </Box>
             </span>
           </div>
         ))}
