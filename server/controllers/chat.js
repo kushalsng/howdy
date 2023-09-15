@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const Chat = require('../models/chat');
 const User = require('../models/user');
+const Message = require('../models/message');
 
 exports.fetchOrCreateChat = asyncHandler(async (req, res) => {
   const { userId } = req.body;
@@ -93,7 +94,7 @@ exports.fetchChats = asyncHandler(async (req, res) => {
   }
 });
 
-exports.addGroupChat = asyncHandler(async (req, res) => {
+exports.createGroupChat = asyncHandler(async (req, res) => {
   const { name, users } = req.body;
   try {
     if (!users || !users.length) {
@@ -122,6 +123,15 @@ exports.addGroupChat = asyncHandler(async (req, res) => {
       .populate('users', '-password')
       .populate('groupAdmin', '-password');
 
+    const groupLog = await Message.create({
+      sender: req.user._id,
+      content: `${req.user.name} created the group`,
+      chat: groupChat._id,
+      isGroupLog: true,
+    });
+    await Chat.findByIdAndUpdate(groupChat._id, {
+      latestMessage: groupLog,
+    });
     return res.json({
       success: true,
       chat: populatedChat,
@@ -147,6 +157,7 @@ exports.renameGroup = asyncHandler(async (req, res) => {
     }
     const groupChat = await Chat.findOne({
       _id: chatId,
+      isGroupChat: true,
     })
       .populate('users', '-password')
       .populate('groupAdmin', '-password')
@@ -165,6 +176,13 @@ exports.renameGroup = asyncHandler(async (req, res) => {
     }
     groupChat.name = name;
     await groupChat.save();
+
+    await Message.create({
+      sender: req.user._id,
+      content: `${req.user.name} renamed the group to ${name}`,
+      chat: groupChat._id,
+      isGroupLog: true,
+    });
     return res.json({
       success: true,
       msg: 'Group renamed successfully!',
@@ -210,7 +228,7 @@ exports.addUserToGroup = asyncHandler(async (req, res) => {
         msg: 'User not found!',
       });
     }
-    if (group.users.find((user) => user._id === userId)) {
+    if (group.users.find((user) => user._id.toString() === userId)) {
       return res.status(400).json({
         success: false,
         msg: `User already exist in group ${group.name}`,
@@ -218,6 +236,13 @@ exports.addUserToGroup = asyncHandler(async (req, res) => {
     }
     group.users.push(userId);
     await group.save();
+
+    await Message.create({
+      sender: req.user._id,
+      content: `${req.user.name} added ${user.name}`,
+      chat: group._id,
+      isGroupLog: true,
+    });
     return res.json({
       success: true,
       msg: `${user.name} added to ${group.name} successfully!`,
@@ -276,6 +301,13 @@ exports.removeUserFromGroup = asyncHandler(async (req, res) => {
     }
     group.users = group.users.filter((user) => user._id.toString() !== userId);
     await group.save();
+
+    await Message.create({
+      sender: req.user._id,
+      content: `${req.user.name} removed ${user.name}`,
+      chat: group._id,
+      isGroupLog: true,
+    });
     return res.json({
       success: true,
       msg: `${user.name} removed from ${group.name} successfully!`,
@@ -327,6 +359,12 @@ exports.leaveGroup = asyncHandler(async (req, res) => {
       (user) => user._id.toString() !== req.user._id.toString()
     );
     await group.save();
+    await Message.create({
+      sender: req.user._id,
+      content: `${req.user.name} left`,
+      chat: group._id,
+      isGroupLog: true,
+    });
     return res.json({
       success: true,
       msg: `You left ${group.name}!`,

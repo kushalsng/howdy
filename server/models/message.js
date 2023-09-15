@@ -12,6 +12,10 @@ const messageSchema = mongoose.Schema({
   chat: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Chat",
+  },
+  isGroupLog: {
+    type: Boolean,
+    default: false
   }
 }, { timestamps: true })
 

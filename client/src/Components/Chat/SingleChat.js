@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ChatState } from '../../Context/ChatProvider';
 import {
   Box,
@@ -33,6 +33,7 @@ const SingleChat = () => {
     chats,
     setChats,
   } = ChatState();
+  const messageBoxRef = useRef(null);
   const toast = useToast();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -201,8 +202,8 @@ const SingleChat = () => {
                 margin='auto'
               />
             ) : (
-              <div className='messages'>
-                <ScrollableChat messages={messages} />
+              <div className='messages' ref={messageBoxRef}>
+                <ScrollableChat messages={messages} messageBoxRef={messageBoxRef} />
               </div>
             )}
             <FormControl onKeyDown={sendMessageHandler} isRequired mt={3}>

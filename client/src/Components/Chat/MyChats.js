@@ -63,11 +63,10 @@ const MyChats = () => {
       >
         {chats ? (
           <>
-            {chats.filter((chat) => chat.latestMessage || chat.isGroupChat)
-              .length ? (
+            {chats.filter((chat) => chat.latestMessage).length ? (
               <Stack overflowY='scroll'>
                 {chats
-                  .filter((chat) => chat.latestMessage || chat.isGroupChat)
+                  .filter((chat) => chat.latestMessage)
                   .map((chat) => (
                     <Box
                       onClick={() => setSelectedChat(chat)}
@@ -127,7 +126,9 @@ const MyChats = () => {
                       >
                         {chat.latestMessage
                           ? ` ${
-                              chat.latestMessage.sender === loggedInUser._id
+                              chat.latestMessage.isGroupLog
+                                ? ''
+                                : chat.latestMessage.sender === loggedInUser._id
                                 ? 'You: '
                                 : chat.isGroupChat
                                 ? chat.users

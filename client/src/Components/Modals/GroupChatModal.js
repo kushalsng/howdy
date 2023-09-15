@@ -20,7 +20,7 @@ import UserListItem from '../User/UserListItem';
 import { debounce } from '../../utils/debounce';
 import UserBadgeItem from '../User/UserBadgeItem';
 import {
-  addGroupChat,
+  createGroupChat,
   addUserToGroup,
   leaveGroup,
   removeUserFromGroup,
@@ -89,7 +89,7 @@ const GroupChatModal = ({ isUpdate = false, children }) => {
       return;
     }
     try {
-      const { data } = await addGroupChat({
+      const { data } = await createGroupChat({
         name: chatName,
         users: selectedUsers.map((user) => user._id),
       });
@@ -151,7 +151,10 @@ const GroupChatModal = ({ isUpdate = false, children }) => {
       setRenameLoading(false);
       setChatName(data.chat.name);
       setSelectedChat(data.chat);
-      setChats([data.chat, ...chats.filter(chat => chat._id !== data.chat._id)])
+      setChats([
+        data.chat,
+        ...chats.filter((chat) => chat._id !== data.chat._id),
+      ]);
       toast({
         title: 'Group Renamed!',
         status: 'success',

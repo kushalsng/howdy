@@ -156,6 +156,7 @@ const Header = () => {
                       cursor='pointer'
                       onClick={() => {
                         setSelectedChat(notification);
+                        setChats([notification, ...chats.filter((chat) => chat._id !== notification._id)])
                         setNotifications(
                           notifications?.filter(
                             (notif) => notif._id !== notification._id
