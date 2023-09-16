@@ -19,6 +19,7 @@ import '../../assets/styles/styles.css';
 import io from 'socket.io-client';
 import Lottie from 'react-lottie';
 import animationData from '../../assets/animations/typing.json';
+import ReplyCard from '../Message/ReplyCard';
 const ENDPOINT = 'https://howdy-rvua.onrender.com';
 // const ENDPOINT = 'http://localhost:5000';
 let socket, selectedChatCompare;
@@ -34,6 +35,7 @@ const SingleChat = () => {
     setChats,
   } = ChatState();
   const messageBoxRef = useRef(null);
+  const inputBoxRef = useRef(null);
   const toast = useToast();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -41,6 +43,7 @@ const SingleChat = () => {
   const [isSocketConnected, setSocketConnected] = useState(false);
   const [typing, setTyping] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [replyOfMessage, setReplyOfMessage] = useState(null);
 
   const fetchMessages = async () => {
     if (!selectedChat) return;
@@ -70,11 +73,16 @@ const SingleChat = () => {
       socket.emit('stop typing', selectedChat._id);
       try {
         setNewMessage('');
-        const { data } = await sendMessage({
+        const params = {
           chatId: selectedChat._id,
           content: newMessage,
-        });
+        };
+        if (replyOfMessage) {
+          params.replyOfMessageId = replyOfMessage._id;
+        }
+        const { data } = await sendMessage(params);
         socket.emit('new message', data.message);
+        setReplyOfMessage(null)
         setMessages([...messages, data.message]);
               } catch (err) {
         console.error('error while sending message: ', err);
@@ -203,7 +211,12 @@ const SingleChat = () => {
               />
             ) : (
               <div className='messages' ref={messageBoxRef}>
-                <ScrollableChat messages={messages} messageBoxRef={messageBoxRef} />
+                <ScrollableChat
+                  messages={messages}
+                  messageBoxRef={messageBoxRef}
+                  inputBoxRef={inputBoxRef}
+                  setReplyOfMessage={setReplyOfMessage}
+                />
               </div>
             )}
             <FormControl onKeyDown={sendMessageHandler} isRequired mt={3}>
@@ -225,15 +238,25 @@ const SingleChat = () => {
               ) : (
                 <></>
               )}
-              <Input
-                variant='filled'
-                bg='#E8E8E8'
-                placeholder='Write a message...'
-                onChange={typingHandler}
-                value={newMessage}
-                border={{ base: '0.5px solid lightgrey' }}
-                _focus={{ borderWidth: '2px' }}
-              />
+
+              <div>
+                {replyOfMessage && (
+                  <ReplyCard
+                    message={replyOfMessage}
+                    setReplyOfMessage={setReplyOfMessage}
+                  />
+                )}
+                <Input
+                  ref={inputBoxRef}
+                  variant='filled'
+                  bg='#E8E8E8'
+                  placeholder='Write a message...'
+                  onChange={typingHandler}
+                  value={newMessage}
+                  border={{ base: '0.5px solid lightgrey' }}
+                  _focus={{ borderWidth: '2px' }}
+                />
+              </div>
             </FormControl>
           </Box>
         </>

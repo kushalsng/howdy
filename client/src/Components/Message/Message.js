@@ -2,27 +2,40 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ChatState } from '../../Context/ChatProvider';
 import { DateTime } from 'luxon';
 import '../../assets/styles/styles.css';
-import {
-  isLastMessage,
-  isSameSender,
-  isSameUser,
-} from '../../utils/chat';
+import { isLastMessage, isSameSender, isSameUser } from '../../utils/chat';
 import { Avatar, Box } from '@chakra-ui/react';
 import { RiReplyFill } from 'react-icons/ri';
+import ReplyCard from './ReplyCard';
+import { avatarWidth, replyIconWidth } from '../../Constants/message';
 
-const Message = ({ message, messages, index, messageBoxRef, setReplyOfMessage }) => {
-  const replyIconWidth = 26;
+const Message = ({
+  message,
+  messages,
+  index,
+  messageBoxRef,
+  inputBoxRef,
+  setReplyOfMessage,
+}) => {
   const { user } = ChatState();
-  const ref = useRef(null);
+  const isMyMessage = Boolean(message.sender._id === user._id);
+  const messageRef = useRef(null);
+
   const [isHoveringMessage, setIsHoveringMessage] = useState(false);
   const [marginLeft, setMarginLeft] = useState(0);
+
   const handleResize = () => {
-    if (message.sender._id === user._id) {
-      const messageWidth = ref.current.offsetWidth + 5;
+    if (isMyMessage) {
+      const messageWidth = messageRef.current.offsetWidth + 5;
       const boxWidth = messageBoxRef.current.offsetWidth;
       const margin = boxWidth - messageWidth;
-      console.log(messageWidth, margin);
       setMarginLeft(margin);
+    } else if (
+      !(
+        isSameSender(messages, message, index, user._id) ||
+        isLastMessage(messages, index, user._id)
+      )
+    ) {
+      setMarginLeft(avatarWidth);
     } else {
       setMarginLeft(0);
     }
@@ -40,7 +53,10 @@ const Message = ({ message, messages, index, messageBoxRef, setReplyOfMessage })
       className='message'
       onMouseEnter={() => setIsHoveringMessage(true)}
       onMouseLeave={() => setIsHoveringMessage(false)}
-      onClick={() => setReplyOfMessage(message)}
+      onClick={() => {
+        setReplyOfMessage(message);
+        inputBoxRef.current.focus();
+      }}
     >
       {(isSameSender(messages, message, index, user._id) ||
         isLastMessage(messages, index, user._id)) && (
@@ -60,24 +76,38 @@ const Message = ({ message, messages, index, messageBoxRef, setReplyOfMessage })
             padding: '0 5px',
             cursor: 'pointer',
             marginLeft: marginLeft - replyIconWidth,
-            display: message.sender._id !== user._id ? 'none' : 'inline',
+            display: !isMyMessage ? 'none' : 'inline',
           }}
         >
           <RiReplyFill />
         </span>
       )}
       <span
-        ref={ref}
+        ref={messageRef}
         style={{
-          backgroundColor:
-            message.sender._id === user._id ? '#BEE3F8' : '#B9F5D0',
+          backgroundColor: isMyMessage ? '#BEE3F8' : '#B9F5D0',
           borderRadius: '20px',
           padding: '5px 15px',
           maxWidth: '75%',
-          marginLeft: isHoveringMessage ? 0 : marginLeft,
-          marginTop: isSameUser(messages, message, index, user._id) ? 3 : 10,
+          marginLeft: !isHoveringMessage
+            ? marginLeft
+            : isMyMessage ||
+              isSameSender(messages, message, index, user._id) ||
+              isLastMessage(messages, index, user._id)
+            ? 0
+            : avatarWidth,
+          marginTop: isSameUser(messages, message, index, user._id)
+            ? 3
+            : !isSameUser(messages, message, index, user._id) &&
+              message.sender._id !== user._id &&
+              message.chat.isGroupChat
+            ? 0
+            : 10,
         }}
       >
+        {message.replyOfMessage && (
+          <ReplyCard message={message.replyOfMessage} />
+        )}
         <Box>
           <span>{message.content}</span>
           <span
@@ -98,7 +128,7 @@ const Message = ({ message, messages, index, messageBoxRef, setReplyOfMessage })
           style={{
             padding: '5px 5px',
             cursor: 'pointer',
-            display: message.sender._id === user._id ? 'none' : 'inline',
+            display: isMyMessage ? 'none' : 'inline',
           }}
         >
           <RiReplyFill />

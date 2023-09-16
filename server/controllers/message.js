@@ -41,8 +41,8 @@ exports.sendMessage = asyncHandler(async (req, res) => {
         _id: replyOfMessageId,
         isGroupLog: false,
         chat: chatId,
-      })
-      if(!replyOfMessage) {
+      });
+      if (!replyOfMessage) {
         return res.status(400).json({
           success: false,
           msg: `Can't find the message you're replying to!`,
@@ -52,8 +52,12 @@ exports.sendMessage = asyncHandler(async (req, res) => {
     }
     let message = await Message.create(createMessageConditions);
     message = await message.populate('sender', 'name userPic');
-    if(replyOfMessageId){
-      message = await message.populate('replyOfMessage', 'content sender');
+    if (replyOfMessageId) {
+      message = await message.populate('replyOfMessage');
+      message = await Message.populate(message, {
+        path: 'replyOfMessage.sender',
+        select: 'name'
+      })
     }
     message = await message.populate('chat');
     message = await User.populate(message, {
@@ -101,6 +105,24 @@ exports.getAllMessages = asyncHandler(async (req, res) => {
     const messages = await Message.find({ chat: chatId })
       .populate('sender', 'name userPic email')
       .populate('chat');
+
+    const replyMessageIds = messages
+      .filter((message) => message.replyOfMessage)
+      .map((message) => message.replyOfMessage);
+
+    const replyMessages = await Message.find({
+      _id: { $in: replyMessageIds },
+      chat: chatId,
+    }).populate('sender', 'name userPic email');
+
+    messages.forEach((message) => {
+      if (message.replyOfMessage) {
+        message.replyOfMessage = replyMessages.find(
+          (replyMessage) =>
+            replyMessage._id.toString() === message.replyOfMessage.toString()
+        );
+      }
+    });
     return res.json({
       success: true,
       messages,

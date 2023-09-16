@@ -4,8 +4,17 @@ import { DateTime } from 'luxon';
 import DateBadge from '../Message/DateBadge';
 import Message from '../Message/Message';
 import GroupLog from '../Message/GroupLog';
+import { isSameUser } from '../../utils/chat';
+import { ChatState } from '../../Context/ChatProvider';
+import { avatarWidth } from '../../Constants/message';
 
-const ScrollableChat = ({ messages, messageBoxRef, setReplyOfMessage }) => {
+const ScrollableChat = ({
+  messages,
+  messageBoxRef,
+  setReplyOfMessage,
+  inputBoxRef,
+}) => {
+  const { user } = ChatState();
   return (
     <ScrollableFeed forceScroll>
       {messages &&
@@ -21,7 +30,28 @@ const ScrollableChat = ({ messages, messageBoxRef, setReplyOfMessage }) => {
             {message.isGroupLog ? (
               <GroupLog message={message} messageBoxRef={messageBoxRef} />
             ) : (
-              <Message index={index} message={message} messages={messages} messageBoxRef={messageBoxRef} setReplyOfMessage={setReplyOfMessage} />
+              <>
+                {(!isSameUser(messages, message, index, user._id) &&
+                  message.sender._id !== user._id &&
+                  message.chat.isGroupChat) && (
+                    <span
+                      style={{
+                        fontSize: '0.7rem',
+                        marginLeft: avatarWidth + 8,
+                      }}
+                    >
+                      {message.sender.name}
+                    </span>
+                  )}
+                <Message
+                  index={index}
+                  message={message}
+                  messages={messages}
+                  messageBoxRef={messageBoxRef}
+                  inputBoxRef={inputBoxRef}
+                  setReplyOfMessage={setReplyOfMessage}
+                />
+              </>
             )}
           </React.Fragment>
         ))}

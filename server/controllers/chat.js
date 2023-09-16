@@ -76,7 +76,7 @@ exports.fetchChats = asyncHandler(async (req, res) => {
     chats.forEach((chat) => {
       if (chat.latestMessage) {
         chat.latestMessageSender = senders.find(
-          (sender) => sender._id === chat.latestMessage.sender
+          (sender) => sender._id.toString() === chat.latestMessage.sender.toString()
         );
       }
     });
