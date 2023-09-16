@@ -53,8 +53,7 @@ const server = app.listen(
 const io = socket(server, {
   pingTimeout: 60000,
   cors: {
-    origin: 'https://howdy-there.onrender.com',
-    // origin: 'http://localhost:3000',
+    origin: process.env.BASE_URL,
   },
 });
 

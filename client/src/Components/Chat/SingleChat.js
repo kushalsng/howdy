@@ -20,8 +20,6 @@ import io from 'socket.io-client';
 import Lottie from 'react-lottie';
 import animationData from '../../assets/animations/typing.json';
 import ReplyCard from '../Message/ReplyCard';
-const ENDPOINT = 'https://howdy-rvua.onrender.com';
-// const ENDPOINT = 'http://localhost:5000';
 let socket, selectedChatCompare;
 
 const SingleChat = () => {
@@ -82,9 +80,9 @@ const SingleChat = () => {
         }
         const { data } = await sendMessage(params);
         socket.emit('new message', data.message);
-        setReplyOfMessage(null)
+        setReplyOfMessage(null);
         setMessages([...messages, data.message]);
-              } catch (err) {
+      } catch (err) {
         console.error('error while sending message: ', err);
         toast({
           title: 'Unable to send message',
@@ -120,7 +118,7 @@ const SingleChat = () => {
   };
   useEffect(() => {
     if (user) {
-      socket = io(ENDPOINT);
+      socket = io(process.env.REACT_APP_BASE_URL);
       socket.emit('setup', user);
       socket.on('connected', () => setSocketConnected(true));
       socket.on('typing', () => setIsTyping(true));
@@ -130,6 +128,7 @@ const SingleChat = () => {
   useEffect(() => {
     fetchMessages();
     setNewMessage('');
+    setReplyOfMessage(null);
     selectedChatCompare = selectedChat;
   }, [selectedChat]);
 
@@ -153,7 +152,7 @@ const SingleChat = () => {
           }
         }
       } else {
-                setMessages([...messages, receivedMessage]);
+        setMessages([...messages, receivedMessage]);
       }
     });
   });

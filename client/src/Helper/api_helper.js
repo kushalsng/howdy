@@ -1,6 +1,5 @@
 import axios from 'axios';
-const baseURL = 'https://howdy-rvua.onrender.com';
-// const baseURL = 'http://localhost:5000';
+const baseURL = process.env.REACT_APP_BASE_URL
 
 
 axios.interceptors.request.use((request) => {
