@@ -4,7 +4,7 @@ const Message = require('../models/message.js');
 const Chat = require('../models/chat.js');
 
 exports.sendMessage = asyncHandler(async (req, res) => {
-  const { chatId, content } = req.body;
+  const { chatId, content, replyOfMessageId } = req.body;
   try {
     if (!chatId || !content) {
       return res.status(400).json({
@@ -12,31 +12,49 @@ exports.sendMessage = asyncHandler(async (req, res) => {
         msg: !chatId ? 'Chat not found!' : 'Message is empty!',
       });
     }
-    // check if chat exist or not 
+    // check if chat exist or not
     const chat = await Chat.findOne({
       _id: chatId,
       users: { $elemMatch: { $eq: req.user._id } },
-    })
-    if(!chat) {
+    });
+    if (!chat) {
       return res.status(400).json({
         success: false,
-        msg: "Chat not found!"
-      })
+        msg: 'Chat not found!',
+      });
     }
     // check if content is valid message or not
     const messageText = content ? content.trim() : null;
-    if(!messageText || !messageText.length){
+    if (!messageText || !messageText.length) {
       return res.status(400).json({
         success: false,
-        msg: "Invalid message!"
-      })
+        msg: 'Invalid message!',
+      });
     }
-    let message = await Message.create({
+    const createMessageConditions = {
       sender: req.user._id,
       content: content,
       chat: chatId,
-    });
+    };
+    if (replyOfMessageId) {
+      const replyOfMessage = await Message.findOne({
+        _id: replyOfMessageId,
+        isGroupLog: false,
+        chat: chatId,
+      })
+      if(!replyOfMessage) {
+        return res.status(400).json({
+          success: false,
+          msg: `Can't find the message you're replying to!`,
+        });
+      }
+      createMessageConditions.replyOfMessage = replyOfMessageId;
+    }
+    let message = await Message.create(createMessageConditions);
     message = await message.populate('sender', 'name userPic');
+    if(replyOfMessageId){
+      message = await message.populate('replyOfMessage', 'content sender');
+    }
     message = await message.populate('chat');
     message = await User.populate(message, {
       path: 'chat.users',
@@ -62,10 +80,10 @@ exports.sendMessage = asyncHandler(async (req, res) => {
 exports.getAllMessages = asyncHandler(async (req, res) => {
   const { chatId } = req.params;
   try {
-    if(!chatId) {
+    if (!chatId) {
       return res.status(400).json({
         success: false,
-        msg: "Chat not found",
+        msg: 'Chat not found',
       });
     }
     // check if chat exist or not
@@ -73,18 +91,20 @@ exports.getAllMessages = asyncHandler(async (req, res) => {
     const chat = await Chat.findOne({
       _id: chatId,
       users: { $elemMatch: { $eq: req.user._id } },
-    })
-    if(!chat) {
+    });
+    if (!chat) {
       return res.status(400).json({
         success: false,
-        msg: "Chat not found!"
-      })
+        msg: 'Chat not found!',
+      });
     }
-    const messages = await Message.find({ chat: chatId }).populate("sender", "name userPic email").populate("chat");
+    const messages = await Message.find({ chat: chatId })
+      .populate('sender', 'name userPic email')
+      .populate('chat');
     return res.json({
       success: true,
-      messages
-    })
+      messages,
+    });
   } catch (err) {
     console.error('error while sending message, ', err);
     return res.status(409).json({

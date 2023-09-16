@@ -14,7 +14,7 @@ import { login } from '../../Helper/auth_api_helper';
 import { ChatState } from '../../Context/ChatProvider';
 
 const SignUp = () => {
-  const { setUser, setChats } = ChatState();
+  const { setUser, setChats, setSelectedChat } = ChatState();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -51,6 +51,7 @@ const SignUp = () => {
     }
     try {
       setChats(null)
+      setSelectedChat(null)
       const { data } = await login({
         email,
         password,
