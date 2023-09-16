@@ -5,9 +5,9 @@ import DateBadge from '../Message/DateBadge';
 import Message from '../Message/Message';
 import GroupLog from '../Message/GroupLog';
 
-const ScrollableChat = ({ messages, messageBoxRef }) => {
+const ScrollableChat = ({ messages, messageBoxRef, setReplyOfMessage }) => {
   return (
-    <ScrollableFeed>
+    <ScrollableFeed forceScroll>
       {messages &&
         messages.map((message, index) => (
           <React.Fragment key={index}>
@@ -21,7 +21,7 @@ const ScrollableChat = ({ messages, messageBoxRef }) => {
             {message.isGroupLog ? (
               <GroupLog message={message} messageBoxRef={messageBoxRef} />
             ) : (
-              <Message index={index} message={message} messages={messages} />
+              <Message index={index} message={message} messages={messages} messageBoxRef={messageBoxRef} setReplyOfMessage={setReplyOfMessage} />
             )}
           </React.Fragment>
         ))}
