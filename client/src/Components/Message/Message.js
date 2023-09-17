@@ -53,10 +53,6 @@ const Message = ({
       className='message'
       onMouseEnter={() => setIsHoveringMessage(true)}
       onMouseLeave={() => setIsHoveringMessage(false)}
-      onClick={() => {
-        setReplyOfMessage(message);
-        inputBoxRef.current.focus();
-      }}
     >
       {(isSameSender(messages, message, index, user._id) ||
         isLastMessage(messages, index, user._id)) && (
@@ -77,6 +73,10 @@ const Message = ({
             cursor: 'pointer',
             marginLeft: marginLeft - replyIconWidth,
             display: !isMyMessage ? 'none' : 'inline',
+          }}
+          onClick={() => {
+            setReplyOfMessage(message);
+            inputBoxRef.current.focus();
           }}
         >
           <RiReplyFill />
@@ -129,6 +129,10 @@ const Message = ({
             padding: '5px 5px',
             cursor: 'pointer',
             display: isMyMessage ? 'none' : 'inline',
+          }}
+          onClick={() => {
+            setReplyOfMessage(message);
+            inputBoxRef.current.focus();
           }}
         >
           <RiReplyFill />

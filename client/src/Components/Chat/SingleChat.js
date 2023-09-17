@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ChatState } from '../../Context/ChatProvider';
 import {
   Box,
+  Button,
   FormControl,
   IconButton,
   Input,
@@ -20,6 +21,10 @@ import io from 'socket.io-client';
 import Lottie from 'react-lottie';
 import animationData from '../../assets/animations/typing.json';
 import ReplyCard from '../Message/ReplyCard';
+import { RiSendPlane2Fill } from 'react-icons/ri';
+import { FaRegSmile } from 'react-icons/fa';
+import EmojiPicker, { Emoji } from 'emoji-picker-react';
+
 let socket, selectedChatCompare;
 
 const SingleChat = () => {
@@ -42,7 +47,14 @@ const SingleChat = () => {
   const [typing, setTyping] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [replyOfMessage, setReplyOfMessage] = useState(null);
+  const [isOpenEmojiPicker, setIsOpenEmojiPicker] = useState(true);
 
+  const escapeKeyHandler = (e) => {
+    if (e.key === 'Escape') {
+      setIsOpenEmojiPicker(false);
+      inputBoxRef.current.focus();
+    }
+  };
   const fetchMessages = async () => {
     if (!selectedChat) return;
     try {
@@ -67,10 +79,11 @@ const SingleChat = () => {
   };
 
   const sendMessageHandler = async (e) => {
-    if (e.key === 'Enter' && newMessage) {
+    if ((e.key === 'Enter' || e.type === 'click') && newMessage) {
       socket.emit('stop typing', selectedChat._id);
       try {
         setNewMessage('');
+        setIsOpenEmojiPicker(false);
         const params = {
           chatId: selectedChat._id,
           content: newMessage,
@@ -128,6 +141,7 @@ const SingleChat = () => {
   useEffect(() => {
     fetchMessages();
     setNewMessage('');
+    setIsOpenEmojiPicker(false);
     setReplyOfMessage(null);
     selectedChatCompare = selectedChat;
   }, [selectedChat]);
@@ -209,7 +223,11 @@ const SingleChat = () => {
                 margin='auto'
               />
             ) : (
-              <div className='messages' ref={messageBoxRef}>
+              <div
+                className='messages'
+                onClick={() => setIsOpenEmojiPicker(false)}
+                ref={messageBoxRef}
+              >
                 <ScrollableChat
                   messages={messages}
                   messageBoxRef={messageBoxRef}
@@ -218,7 +236,14 @@ const SingleChat = () => {
                 />
               </div>
             )}
-            <FormControl onKeyDown={sendMessageHandler} isRequired mt={3}>
+            <FormControl
+              onKeyDown={(e) => {
+                sendMessageHandler(e);
+                escapeKeyHandler(e);
+              }}
+              isRequired
+              mt={3}
+            >
               {isTyping ? (
                 <div>
                   <Lottie
@@ -245,16 +270,60 @@ const SingleChat = () => {
                     setReplyOfMessage={setReplyOfMessage}
                   />
                 )}
-                <Input
-                  ref={inputBoxRef}
-                  variant='filled'
-                  bg='#E8E8E8'
-                  placeholder='Write a message...'
-                  onChange={typingHandler}
-                  value={newMessage}
-                  border={{ base: '0.5px solid lightgrey' }}
-                  _focus={{ borderWidth: '2px' }}
-                />
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    position: 'relative',
+                  }}
+                >
+                  <Input
+                    ref={inputBoxRef}
+                    variant='filled'
+                    ps='2.8rem'
+                    bg='#E8E8E8'
+                    placeholder='Write a message...'
+                    onChange={typingHandler}
+                    value={newMessage}
+                    border={{ base: '0.5px solid lightgrey' }}
+                    _focus={{ borderWidth: '2px' }}
+                  />
+                  <span
+                    style={{
+                      position: 'absolute',
+                      fontSize: 25,
+                      color: '#262626',
+                      padding: '0.5rem 0.7rem',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => {
+                      setIsOpenEmojiPicker(!isOpenEmojiPicker);
+                    }}
+                  >
+                    <FaRegSmile />
+                  </span>
+                  <span
+                    style={{
+                      position: 'absolute',
+                      display: isOpenEmojiPicker ? 'block' : 'none',
+                      bottom: '3rem',
+                    }}
+                  >
+                    <EmojiPicker
+                      autoFocusSearch={false}
+                      onEmojiClick={(e) =>
+                        setNewMessage((prevMessage) => prevMessage + e.emoji)
+                      }
+                    />
+                  </span>
+                  <Button
+                    background='transparent'
+                    ms='1rem'
+                    onClick={sendMessageHandler}
+                  >
+                    <RiSendPlane2Fill />
+                  </Button>
+                </div>
               </div>
             </FormControl>
           </Box>

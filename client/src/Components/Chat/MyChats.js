@@ -61,8 +61,8 @@ const MyChats = () => {
               <Stack overflowY='scroll'>
                 {chats
                   .filter((chat) => chat.latestMessage)
-                  .map((chat) => (
-                    <ChatListCard chat={chat} />
+                  .map((chat, index) => (
+                    <ChatListCard key={index} chat={chat} />
                   ))}
               </Stack>
             ) : (

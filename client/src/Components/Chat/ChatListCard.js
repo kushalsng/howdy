@@ -8,7 +8,7 @@ import {
 } from '../../utils/chat';
 import { DateTime } from 'luxon';
 
-const ChatListCard = ({ chat }) => {
+const ChatListCard = ({ chat }, key) => {
   const { selectedChat, setSelectedChat, user: loggedInUser } = ChatState();
   return (
     <Box
@@ -19,7 +19,7 @@ const ChatListCard = ({ chat }) => {
       px={3}
       py={2}
       borderRadius='lg'
-      key={chat._id}
+      key={key}
     >
       <Text>
         <Box>
