@@ -123,9 +123,9 @@ const SignUp = () => {
       >
         Login
       </Button>
-      <Button colorScheme='red' width='100%' onClick={handleGuestCredentials}>
+      {/* <Button colorScheme='blue' width='100%' onClick={handleGuestCredentials}>
         Get Guest User Credentials
-      </Button>
+      </Button> */}
     </VStack>
   );
 };
