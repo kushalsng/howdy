@@ -48,6 +48,7 @@ const SingleChat = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [replyOfMessage, setReplyOfMessage] = useState(null);
   const [isOpenEmojiPicker, setIsOpenEmojiPicker] = useState(true);
+  const [isAtBottom, setIsAtBottom] = useState(true);
 
   const escapeKeyHandler = (e) => {
     if (e.key === 'Escape') {
@@ -233,6 +234,9 @@ const SingleChat = () => {
                   messageBoxRef={messageBoxRef}
                   inputBoxRef={inputBoxRef}
                   setReplyOfMessage={setReplyOfMessage}
+                  isTyping={isTyping}
+                  isAtBottom={isAtBottom}
+                  setIsAtBottom={setIsAtBottom}
                 />
               </div>
             )}
@@ -242,10 +246,17 @@ const SingleChat = () => {
                 escapeKeyHandler(e);
               }}
               isRequired
-              mt={3}
+              mt={replyOfMessage ? 0 : 3}
+              position='relative'
             >
               {isTyping ? (
-                <div>
+                <div
+                  style={{
+                    position: isAtBottom ? 'static' : 'absolute',
+                    background: 'none',
+                    bottom: !replyOfMessage ? '2rem' : '5rem',
+                  }}
+                >
                   <Lottie
                     options={{
                       loop: true,

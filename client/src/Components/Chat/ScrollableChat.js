@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ScrollableFeed from 'react-scrollable-feed';
 import { DateTime } from 'luxon';
 import DateBadge from '../Message/DateBadge';
@@ -13,10 +13,28 @@ const ScrollableChat = ({
   messageBoxRef,
   setReplyOfMessage,
   inputBoxRef,
+  isTyping,
+  setIsAtBottom,
+  isAtBottom,
 }) => {
   const { user } = ChatState();
+  const feedRef = useRef(null);
+
+  useEffect(() => {
+    if (
+      (messages &&
+        messages.length &&
+        messages[messages.length - 1].sender._id === user._id) ||
+      (isTyping && isAtBottom)
+    ) {
+      feedRef.current.scrollToBottom();
+    }
+  }, [messages, isTyping]);
   return (
-    <ScrollableFeed forceScroll>
+    <ScrollableFeed
+      ref={feedRef}
+      onScroll={(isAtBottom) => setIsAtBottom(isAtBottom)}
+    >
       {messages &&
         messages.map((message, index) => (
           <React.Fragment key={index}>
