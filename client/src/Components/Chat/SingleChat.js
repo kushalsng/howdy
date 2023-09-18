@@ -24,6 +24,7 @@ import ReplyCard from '../Message/ReplyCard';
 import { RiSendPlane2Fill } from 'react-icons/ri';
 import { FaRegSmile } from 'react-icons/fa';
 import EmojiPicker, { Emoji } from 'emoji-picker-react';
+import { messageCountLimit } from '../../Constants/message';
 
 let socket, selectedChatCompare;
 
@@ -37,11 +38,14 @@ const SingleChat = () => {
     chats,
     setChats,
   } = ChatState();
-  const messageBoxRef = useRef(null);
+
   const inputBoxRef = useRef(null);
   const toast = useToast();
   const [messages, setMessages] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [totalMessagesCount, setTotalMessagesCount] = useState(0);
+  const [fetchedMessageCount, setFetchedMessageCount] = useState(0);
+  const [fetchingChat, setFetchingChat] = useState(false);
+  const [fetchingMessages, setFetchingMessages] = useState(false);
   const [newMessage, setNewMessage] = useState('');
   const [isSocketConnected, setSocketConnected] = useState(false);
   const [typing, setTyping] = useState(false);
@@ -49,6 +53,7 @@ const SingleChat = () => {
   const [replyOfMessage, setReplyOfMessage] = useState(null);
   const [isOpenEmojiPicker, setIsOpenEmojiPicker] = useState(true);
   const [isAtBottom, setIsAtBottom] = useState(true);
+  const [isAtTop, setIsAtTop] = useState(false);
 
   const escapeKeyHandler = (e) => {
     if (e.key === 'Escape') {
@@ -56,13 +61,17 @@ const SingleChat = () => {
       inputBoxRef.current.focus();
     }
   };
-  const fetchMessages = async () => {
+  const fetchMessages = async (skip, limit) => {
     if (!selectedChat) return;
     try {
-      setLoading(true);
-      const { data } = await getChatMessages(selectedChat._id);
-      setMessages(data.messages);
-      setLoading(false);
+      setFetchingChat(true);
+      setFetchingMessages(true);
+      const { data } = await getChatMessages(selectedChat._id, skip, limit);
+      setMessages([...messages, ...data.messages]);
+      setFetchedMessageCount((prevCount) => prevCount + data.messages.length);
+      setTotalMessagesCount(data.totalMessagesCount);
+      setFetchingMessages(false);
+      setFetchingChat(false);
 
       socket.emit('join chat', selectedChat._id);
     } catch (err) {
@@ -140,12 +149,21 @@ const SingleChat = () => {
     }
   }, [user]);
   useEffect(() => {
-    fetchMessages();
+    fetchMessages(0, messageCountLimit);
     setNewMessage('');
     setIsOpenEmojiPicker(false);
     setReplyOfMessage(null);
     selectedChatCompare = selectedChat;
   }, [selectedChat]);
+  useEffect(() => {
+    if (
+      isAtTop &&
+      fetchedMessageCount >= messageCountLimit &&
+      fetchedMessageCount < totalMessagesCount
+    ) {
+      fetchMessages(fetchedMessageCount, messageCountLimit);
+    }
+  }, [isAtTop]);
 
   useEffect(() => {
     socket.on('message received', (receivedMessage) => {
@@ -215,7 +233,7 @@ const SingleChat = () => {
             borderRadius='hidden'
             overflowY='hidden'
           >
-            {loading ? (
+            {fetchingChat ? (
               <Spinner
                 size='xl'
                 w={20}
@@ -224,21 +242,17 @@ const SingleChat = () => {
                 margin='auto'
               />
             ) : (
-              <div
-                className='messages'
-                onClick={() => setIsOpenEmojiPicker(false)}
-                ref={messageBoxRef}
-              >
-                <ScrollableChat
-                  messages={messages}
-                  messageBoxRef={messageBoxRef}
-                  inputBoxRef={inputBoxRef}
-                  setReplyOfMessage={setReplyOfMessage}
-                  isTyping={isTyping}
-                  isAtBottom={isAtBottom}
-                  setIsAtBottom={setIsAtBottom}
-                />
-              </div>
+              <ScrollableChat
+                messages={messages}
+                inputBoxRef={inputBoxRef}
+                setReplyOfMessage={setReplyOfMessage}
+                isTyping={isTyping}
+                isAtBottom={isAtBottom}
+                setIsAtBottom={setIsAtBottom}
+                setIsAtTop={setIsAtTop}
+                setIsOpenEmojiPicker={setIsOpenEmojiPicker}
+                fetchingMessages={fetchingMessages}
+              />
             )}
             <FormControl
               onKeyDown={(e) => {

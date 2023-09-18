@@ -82,7 +82,7 @@ exports.sendMessage = asyncHandler(async (req, res) => {
 });
 
 exports.getAllMessages = asyncHandler(async (req, res) => {
-  const { chatId } = req.params;
+  const { chatId, skip, limit } = req.params;
   try {
     if (!chatId) {
       return res.status(400).json({
@@ -90,19 +90,23 @@ exports.getAllMessages = asyncHandler(async (req, res) => {
         msg: 'Chat not found',
       });
     }
-    // check if chat exist or not
-    // and if user is a member of chat or not
+    const limitCount = parseInt(limit) && parseInt(limit) >= 50 ? limit : 50;
+    const skipCount = parseInt(skip) && parseInt(limit) >=  0 ? skip : 0;
+
     const chat = await Chat.findOne({
       _id: chatId,
       users: { $elemMatch: { $eq: req.user._id } },
     });
+
     if (!chat) {
       return res.status(400).json({
         success: false,
         msg: 'Chat not found!',
       });
     }
-    const messages = await Message.find({ chat: chatId })
+
+    const totalMessagesCount = await Message.count({ chat: chatId });
+    const messages = await Message.find({ chat: chatId }).skip(skipCount).limit(limitCount)
       .populate('sender', 'name userPic email')
       .populate('chat');
 
@@ -123,9 +127,11 @@ exports.getAllMessages = asyncHandler(async (req, res) => {
         );
       }
     });
+
     return res.json({
       success: true,
       messages,
+      totalMessagesCount
     });
   } catch (err) {
     console.error('error while sending message, ', err);
