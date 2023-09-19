@@ -16,7 +16,7 @@ const Message = ({
   inputBoxRef,
   setReplyOfMessage,
 }) => {
-  const { user } = ChatState();
+  const { user, selectedChat } = ChatState();
   const isMyMessage = Boolean(message.sender._id === user._id);
   const messageRef = useRef(null);
 
@@ -33,7 +33,8 @@ const Message = ({
       !(
         isSameSender(messages, message, index, user._id) ||
         isLastMessage(messages, index, user._id)
-      )
+      ) &&
+      selectedChat.isGroupChat
     ) {
       setMarginLeft(avatarWidth);
     } else {
@@ -47,7 +48,7 @@ const Message = ({
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, []);
+  }, [messages]);
   return (
     <div
       className='message'
@@ -55,17 +56,18 @@ const Message = ({
       onMouseLeave={() => setIsHoveringMessage(false)}
     >
       {(isSameSender(messages, message, index, user._id) ||
-        isLastMessage(messages, index, user._id)) && (
-        <Avatar
-          mt='7px'
-          mr='1'
-          size='sm'
-          cursor='pointer'
-          title={message.chat.isGroupChat ? message.sender.name : ''}
-          name={message.sender.name}
-          src={message.sender.userPic}
-        />
-      )}
+        isLastMessage(messages, index, user._id)) &&
+        selectedChat.isGroupChat && (
+          <Avatar
+            mt='7px'
+            mr='1'
+            size='sm'
+            cursor='pointer'
+            title={message.chat.isGroupChat ? message.sender.name : ''}
+            name={message.sender.name}
+            src={message.sender.userPic}
+          />
+        )}
       {isHoveringMessage && (
         <span
           style={{
@@ -94,6 +96,8 @@ const Message = ({
             : isMyMessage ||
               isSameSender(messages, message, index, user._id) ||
               isLastMessage(messages, index, user._id)
+            ? 0
+            : !selectedChat.isGroupChat
             ? 0
             : avatarWidth,
           marginTop: isSameUser(messages, message, index, user._id)

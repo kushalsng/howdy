@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ChatState } from '../../Context/ChatProvider';
 import {
+  Avatar,
   Box,
   Button,
   FormControl,
@@ -40,6 +41,8 @@ const SingleChat = () => {
   const messageBoxRef = useRef(null);
   const inputBoxRef = useRef(null);
   const toast = useToast();
+  const receiver =
+    user && selectedChat ? getReceiver(user, selectedChat.users) : {};
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [newMessage, setNewMessage] = useState('');
@@ -192,8 +195,18 @@ const SingleChat = () => {
             />
             {!selectedChat.isGroupChat ? (
               <>
-                {getReceiver(user, selectedChat.users).name}
-                <ProfileModal user={getReceiver(user, selectedChat.users)} />
+                <div>
+                  <Avatar
+                    size='md'
+                    color='black'
+                    cursor='pointer'
+                    name={receiver.name}
+                    src={receiver.userPic}
+                    mx={2}
+                  />
+                  {receiver.name}
+                </div>
+                <ProfileModal user={receiver} />
               </>
             ) : (
               <>
