@@ -6,6 +6,7 @@ import { isLastMessage, isSameSender, isSameUser } from '../../utils/chat';
 import { Avatar, Box } from '@chakra-ui/react';
 import { RiReplyFill } from 'react-icons/ri';
 import ReplyCard from './ReplyCard';
+import ProfileModal from '../Modals/ProfileModal';
 import { avatarWidth, replyIconWidth } from '../../Constants/message';
 
 const Message = ({
@@ -58,15 +59,17 @@ const Message = ({
       {(isSameSender(messages, message, index, user._id) ||
         isLastMessage(messages, index, user._id)) &&
         selectedChat.isGroupChat && (
-          <Avatar
-            mt='7px'
-            mr='1'
-            size='sm'
-            cursor='pointer'
-            title={message.chat.isGroupChat ? message.sender.name : ''}
-            name={message.sender.name}
-            src={message.sender.userPic}
-          />
+          <ProfileModal user={message.sender}>
+            <Avatar
+              mt='7px'
+              mr='1'
+              size='sm'
+              cursor='pointer'
+              title={message.chat.isGroupChat ? message.sender.name : ''}
+              name={message.sender.name}
+              src={message.sender.userPic}
+            />
+          </ProfileModal>
         )}
       {isHoveringMessage && (
         <span

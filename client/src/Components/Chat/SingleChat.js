@@ -195,22 +195,32 @@ const SingleChat = () => {
             />
             {!selectedChat.isGroupChat ? (
               <>
-                <div>
-                  <Avatar
-                    size='md'
-                    color='black'
-                    cursor='pointer'
-                    name={receiver.name}
-                    src={receiver.userPic}
-                    mx={2}
-                  />
-                  {receiver.name}
+                <div style={{ cursor: 'pointer' }}>
+                  <ProfileModal user={receiver}>
+                    <Avatar
+                      size='md'
+                      color='black'
+                      cursor='pointer'
+                      name={receiver.name}
+                      src={receiver.userPic}
+                      mx={2}
+                    />
+                    {receiver.name}
+                  </ProfileModal>
                 </div>
                 <ProfileModal user={receiver} />
               </>
             ) : (
               <>
-                {selectedChat.name.toUpperCase()}
+                <GroupChatModal isUpdate={true}>
+                  <span
+                    style={{
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {selectedChat.name.toUpperCase()}
+                  </span>
+                </GroupChatModal>
                 <GroupChatModal isUpdate={true}>
                   <IconButton display={{ base: 'flex' }} icon={<ViewIcon />} />
                 </GroupChatModal>
