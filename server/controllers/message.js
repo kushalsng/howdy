@@ -52,7 +52,7 @@ exports.sendMessage = asyncHandler(async (req, res) => {
       createMessageConditions.replyOfMessage = replyOfMessageId;
     }
     let message = await Message.create(createMessageConditions);
-    message = await message.populate('sender', 'name userPic');
+    message = await message.populate('sender', 'name userPic email');
     if (replyOfMessageId) {
       message = await message.populate('replyOfMessage');
       message = await Message.populate(message, {

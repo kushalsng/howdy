@@ -6,6 +6,7 @@ import { isLastMessage, isSameSender, isSameUser } from '../../utils/chat';
 import { Avatar, Box } from '@chakra-ui/react';
 import { RiReplyFill } from 'react-icons/ri';
 import ReplyCard from './ReplyCard';
+import ProfileModal from '../Modals/ProfileModal';
 import { avatarWidth, replyIconWidth } from '../../Constants/message';
 
 const Message = ({
@@ -16,7 +17,7 @@ const Message = ({
   inputBoxRef,
   setReplyOfMessage,
 }) => {
-  const { user } = ChatState();
+  const { user, selectedChat } = ChatState();
   const isMyMessage = Boolean(message.sender._id === user._id);
   const messageRef = useRef(null);
 
@@ -33,7 +34,8 @@ const Message = ({
       !(
         isSameSender(messages, message, index, user._id) ||
         isLastMessage(messages, index, user._id)
-      )
+      ) &&
+      selectedChat.isGroupChat
     ) {
       setMarginLeft(avatarWidth);
     } else {
@@ -47,7 +49,7 @@ const Message = ({
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, []);
+  }, [messages]);
   return (
     <div
       className='message'
@@ -55,17 +57,20 @@ const Message = ({
       onMouseLeave={() => setIsHoveringMessage(false)}
     >
       {(isSameSender(messages, message, index, user._id) ||
-        isLastMessage(messages, index, user._id)) && (
-        <Avatar
-          mt='7px'
-          mr='1'
-          size='sm'
-          cursor='pointer'
-          title={message.chat.isGroupChat ? message.sender.name : ''}
-          name={message.sender.name}
-          src={message.sender.userPic}
-        />
-      )}
+        isLastMessage(messages, index, user._id)) &&
+        selectedChat.isGroupChat && (
+          <ProfileModal user={message.sender}>
+            <Avatar
+              mt='7px'
+              mr='1'
+              size='sm'
+              cursor='pointer'
+              title={message.chat.isGroupChat ? message.sender.name : ''}
+              name={message.sender.name}
+              src={message.sender.userPic}
+            />
+          </ProfileModal>
+        )}
       {isHoveringMessage && (
         <span
           style={{
@@ -94,6 +99,8 @@ const Message = ({
             : isMyMessage ||
               isSameSender(messages, message, index, user._id) ||
               isLastMessage(messages, index, user._id)
+            ? 0
+            : !selectedChat.isGroupChat
             ? 0
             : avatarWidth,
           marginTop: isSameUser(messages, message, index, user._id)
