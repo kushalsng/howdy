@@ -5,6 +5,6 @@ const {
 } = require('../controllers/message')
 
 router.route('/').post(sendMessage);
-router.route('/:chatId').get(getAllMessages);
+router.route('/').get(getAllMessages);
 
 module.exports = router

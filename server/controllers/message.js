@@ -2,6 +2,7 @@ const asyncHandler = require('express-async-handler');
 const User = require('../models/user.js');
 const Message = require('../models/message.js');
 const Chat = require('../models/chat.js');
+const { messageCountLimit } = require('../constants/message.js');
 
 exports.sendMessage = asyncHandler(async (req, res) => {
   const { chatId, content, replyOfMessageId } = req.body;
@@ -56,8 +57,8 @@ exports.sendMessage = asyncHandler(async (req, res) => {
       message = await message.populate('replyOfMessage');
       message = await Message.populate(message, {
         path: 'replyOfMessage.sender',
-        select: 'name'
-      })
+        select: 'name',
+      });
     }
     message = await message.populate('chat');
     message = await User.populate(message, {
@@ -82,7 +83,7 @@ exports.sendMessage = asyncHandler(async (req, res) => {
 });
 
 exports.getAllMessages = asyncHandler(async (req, res) => {
-  const { chatId, skip, limit } = req.params;
+  const { chatId, skip, limit } = req.query;
   try {
     if (!chatId) {
       return res.status(400).json({
@@ -90,8 +91,13 @@ exports.getAllMessages = asyncHandler(async (req, res) => {
         msg: 'Chat not found',
       });
     }
-    const limitCount = parseInt(limit) && parseInt(limit) >= 50 ? limit : 50;
-    const skipCount = parseInt(skip) && parseInt(limit) >=  0 ? skip : 0;
+
+    const limitCount =
+      parseInt(limit) && parseInt(limit) >= messageCountLimit
+        ? parseInt(limit)
+        : messageCountLimit;
+    const skipCount =
+      parseInt(skip) && parseInt(limit) >= 0 ? parseInt(skip) : 0;
 
     const chat = await Chat.findOne({
       _id: chatId,
@@ -106,7 +112,21 @@ exports.getAllMessages = asyncHandler(async (req, res) => {
     }
 
     const totalMessagesCount = await Message.count({ chat: chatId });
-    const messages = await Message.find({ chat: chatId }).skip(skipCount).limit(limitCount)
+    const messages = await Message.find({ chat: chatId })
+      .skip(
+        totalMessagesCount >= skipCount + limitCount
+          ? totalMessagesCount - (skipCount + limitCount)
+          : totalMessagesCount >= skipCount
+          ? 0
+          : totalMessagesCount
+      )
+      .limit(
+        totalMessagesCount >= skipCount + limitCount
+          ? limitCount
+          : totalMessagesCount >= skipCount
+          ? totalMessagesCount - skipCount
+          : 0
+      )
       .populate('sender', 'name userPic email')
       .populate('chat');
 
@@ -131,7 +151,7 @@ exports.getAllMessages = asyncHandler(async (req, res) => {
     return res.json({
       success: true,
       messages,
-      totalMessagesCount
+      totalMessagesCount,
     });
   } catch (err) {
     console.error('error while sending message, ', err);

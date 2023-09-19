@@ -1,7 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const { chats } = require('./data/data.js');
-const connectDB = require('./config/db.js');
+const connectDB = require('./utils/db.js');
 const colors = require('colors');
 const cors = require('cors');
 const userRoutes = require('./routes/user.js');
@@ -33,9 +32,9 @@ app.use((req, res, next) => {
 app.get('/', (req, res) => {
   res.json({
     success: true,
-    msg: "Howdy👋🏻 server running successfully"
-  })
-})
+    msg: 'Howdy👋🏻 server running successfully',
+  });
+});
 app.use('/', authRoutes);
 app.use('/user', userRoutes);
 app.use('/chat', chatRoutes);
@@ -66,7 +65,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('join chat', (room) => {
-    if(roomId){
+    if (roomId) {
       socket.leave(roomId);
       console.log('User left room: ', roomId);
     }

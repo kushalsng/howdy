@@ -64,14 +64,20 @@ const SingleChat = () => {
   const fetchMessages = async (skip, limit) => {
     if (!selectedChat) return;
     try {
-      setFetchingChat(true);
+      if(isAtBottom) {
+        setFetchingChat(true);
+      }
       setFetchingMessages(true);
       const { data } = await getChatMessages(selectedChat._id, skip, limit);
-      setMessages([...messages, ...data.messages]);
+      if(isAtBottom){
+        setFetchingChat(false);
+        setMessages(data.messages)
+      } else {
+        setMessages([...data.messages, ...messages]);
+      }
       setFetchedMessageCount((prevCount) => prevCount + data.messages.length);
       setTotalMessagesCount(data.totalMessagesCount);
       setFetchingMessages(false);
-      setFetchingChat(false);
 
       socket.emit('join chat', selectedChat._id);
     } catch (err) {

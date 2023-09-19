@@ -33,7 +33,6 @@ const ScrollableChat = ({
       { root: messageBoxRef.current, threshold: [1] }
     );
     const topElement = messageBoxRef.current.children[0].children[0];
-    console.log(topElement);
     observer.observe(topElement);
     return () => {
       observer.disconnect();
