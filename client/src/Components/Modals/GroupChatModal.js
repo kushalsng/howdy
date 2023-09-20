@@ -12,6 +12,7 @@ import {
   FormControl,
   Input,
   Box,
+  Avatar,
 } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import { ChatState } from '../../Context/ChatProvider';
@@ -37,6 +38,7 @@ const GroupChatModal = ({ isUpdate = false, children }) => {
   const [userList, setUserList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [renameLoading, setRenameLoading] = useState(false);
+  const [pic, setPic] = useState(null);
 
   const toast = useToast();
   const {
@@ -73,6 +75,51 @@ const GroupChatModal = ({ isUpdate = false, children }) => {
     }
   }, 300);
 
+  const processImg = (file) => {
+    setLoading(true);
+    if (!file) {
+      toast({
+        title: 'Please select an image!',
+        status: 'warning',
+        duration: 4000,
+        isClosable: true,
+        position: 'bottom',
+        variant: 'left-accent',
+      });
+      setLoading(false);
+      return;
+    }
+    const imgRegex = /[^\s]+(.*?).(jpg|jpeg|png|gif|JPG|JPEG|PNG|GIF)$/;
+    if (!imgRegex.test(file.type)) {
+      toast({
+        title: 'Please select a valid image!',
+        status: 'warning',
+        duration: 4000,
+        isClosable: true,
+        position: 'bottom',
+        variant: 'left-accent',
+      });
+      setLoading(false);
+      return;
+    }
+    const data = new FormData();
+    data.append('file', file);
+    data.append('upload_preset', 'howdy-chat-app');
+    data.append('cloud_name', process.env.REACT_APP_CLOUDINARY_CLOUD_NAME);
+    fetch(process.env.REACT_APP_CLOUDINARY_API, {
+      method: 'post',
+      body: data,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setPic(data.url.toString());
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('error in image upload, ', err);
+        setLoading(false);
+      });
+  };
   const handleCreateGroup = async () => {
     if (!chatName || !selectedUsers || !selectedUsers?.length) {
       toast({
@@ -92,8 +139,10 @@ const GroupChatModal = ({ isUpdate = false, children }) => {
       const { data } = await createGroupChat({
         name: chatName,
         users: selectedUsers.map((user) => user._id),
+        groupPic: pic,
       });
       setChats([data.chat, ...chats]);
+      setSelectedChat(data.chat);
       onClose();
       toast({
         title: 'A New Group Chat Created!',
@@ -405,6 +454,7 @@ const GroupChatModal = ({ isUpdate = false, children }) => {
     if (isUpdate) {
       setChatName(selectedChat.name);
       setSelectedUsers(selectedChat.users);
+      setPic(selectedChat.groupPic);
     } else {
       setChatName('');
       setSelectedUsers([]);
@@ -434,6 +484,25 @@ const GroupChatModal = ({ isUpdate = false, children }) => {
           </ModalHeader>
           <ModalCloseButton />
           <ModalBody display='flex' flexDir='column' alignItems='center'>
+            <Avatar
+              size='2xl'
+              borderRadius='full'
+              boxSize='150px'
+              mb={5}
+              name={chatName || 'groupName'}
+              src={pic}
+            />
+            {!isUpdate && (
+              <FormControl id='pic' mb='1em'>
+                <Input
+                  type='file'
+                  border='0'
+                  cursor='pointer'
+                  accept='image/*'
+                  onChange={(e) => processImg(e.target.files[0])}
+                />
+              </FormControl>
+            )}
             <FormControl id='chatName' isRequired mb='1em'>
               <Box display='flex' justifyContent='center' gap={2}>
                 <Input

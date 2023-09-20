@@ -95,7 +95,7 @@ exports.fetchChats = asyncHandler(async (req, res) => {
 });
 
 exports.createGroupChat = asyncHandler(async (req, res) => {
-  const { name, users } = req.body;
+  const { name, users, groupPic } = req.body;
   try {
     if (!users || !users.length) {
       return res.status(400).json({
@@ -114,6 +114,7 @@ exports.createGroupChat = asyncHandler(async (req, res) => {
     const groupChat = await Chat.create({
       name,
       users,
+      groupPic,
       isGroupChat: true,
       groupAdmin: req.user._id,
     });
