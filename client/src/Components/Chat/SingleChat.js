@@ -213,6 +213,14 @@ const SingleChat = () => {
             ) : (
               <>
                 <GroupChatModal isUpdate={true}>
+                  <Avatar
+                    size='md'
+                    color='black'
+                    cursor='pointer'
+                    name={selectedChat.name}
+                    src={selectedChat.groupPic}
+                    mx={2}
+                  />
                   <span
                     style={{
                       cursor: 'pointer',
