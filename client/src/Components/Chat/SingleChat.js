@@ -20,11 +20,12 @@ import ScrollableChat from './ScrollableChat';
 import '../../assets/styles/styles.css';
 import io from 'socket.io-client';
 import Lottie from 'react-lottie';
-import animationData from '../../assets/animations/typing.json';
+import typingAnimationData from '../../assets/animations/typing.json';
+import audioRecordingAnimationData from '../../assets/animations/audio-recording2.json';
 import ReplyCard from '../Message/ReplyCard';
-import { RiSendPlane2Fill } from 'react-icons/ri';
+import { RiSendPlane2Fill, RiMicFill } from 'react-icons/ri';
 import { FaRegSmile } from 'react-icons/fa';
-import EmojiPicker, { Emoji } from 'emoji-picker-react';
+import EmojiPicker  from 'emoji-picker-react';
 
 let socket, selectedChatCompare;
 
@@ -52,6 +53,7 @@ const SingleChat = () => {
   const [replyOfMessage, setReplyOfMessage] = useState(null);
   const [isOpenEmojiPicker, setIsOpenEmojiPicker] = useState(true);
   const [isAtBottom, setIsAtBottom] = useState(true);
+  const [isRecordingAudio, setIsRecordingAudio] = useState(false);
 
   const escapeKeyHandler = (e) => {
     if (e.key === 'Escape') {
@@ -292,7 +294,7 @@ const SingleChat = () => {
                     options={{
                       loop: true,
                       autoplay: true,
-                      animationData: animationData,
+                      animationData: typingAnimationData,
                       rendererSettings: {
                         preserveAspectRatio: 'xMidYMid slice',
                       },
@@ -322,7 +324,7 @@ const SingleChat = () => {
                   <Input
                     ref={inputBoxRef}
                     variant='filled'
-                    ps='2.8rem'
+                    px='2.8rem'
                     bg='#E8E8E8'
                     placeholder='Write a message...'
                     onChange={typingHandler}
@@ -347,17 +349,48 @@ const SingleChat = () => {
                   <span
                     style={{
                       position: 'absolute',
-                      display: isOpenEmojiPicker ? 'block' : 'none',
-                      bottom: '3rem',
+                      right: isRecordingAudio ? 40 : 63,
+                      top: isRecordingAudio ? -24 : 0,
+                      bottom: isRecordingAudio ? -24 : 0,
+                      fontSize: 25,
+                      color: '#262626',
+                      padding: '0.5rem 0.7rem',
+                      cursor: 'pointer',
                     }}
+                    onClick={() => {setIsRecordingAudio(!isRecordingAudio)}}
                   >
-                    <EmojiPicker
-                      autoFocusSearch={false}
-                      onEmojiClick={(e) =>
-                        setNewMessage((prevMessage) => prevMessage + e.emoji)
-                      }
-                    />
+                    {isRecordingAudio ? (
+                      <Lottie
+                        options={{
+                          loop: true,
+                          autoplay: true,
+                          animationData: audioRecordingAnimationData,
+                          rendererSettings: {
+                            preserveAspectRatio: 'xMidYMid slice',
+                          },
+                        }}
+                        width={70}
+                        style={{ marginBottom: 15, marginLeft: 0 }}
+                      />
+                    ) : (
+                      <RiMicFill />
+                    )}
                   </span>
+                  {isOpenEmojiPicker && (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        bottom: '3rem',
+                      }}
+                    >
+                      <EmojiPicker
+                        autoFocusSearch={false}
+                        onEmojiClick={(e) =>
+                          setNewMessage((prevMessage) => prevMessage + e.emoji)
+                        }
+                      />
+                    </span>
+                  )}
                   <Button
                     background='transparent'
                     ms='1rem'
