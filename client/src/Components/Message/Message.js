@@ -129,10 +129,14 @@ const Message = ({
             maxWidth: '75%',
             marginLeft: getMarginLeft(),
             marginTop: getMarginTop(),
+            width: message.replyOfMessage?.type === 'audio' ? '50%' : '',
           }}
         >
           {message.replyOfMessage && (
-            <ReplyCard message={message.replyOfMessage} />
+            <ReplyCard
+              message={message.replyOfMessage}
+              messageOfReply={message}
+            />
           )}
           <Box>
             <span>{message.content}</span>

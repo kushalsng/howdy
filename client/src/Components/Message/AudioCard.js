@@ -10,7 +10,10 @@ const AudioCard = ({
   audioUrl,
   getMarginTop,
   getMarginLeft,
-  messageRef
+  messageRef,
+  isReply,
+  messageSent,
+  messageOfReply,
 }) => {
   const { user } = ChatState();
   const isMyMessage = Boolean(message && message.sender._id === user._id);
@@ -19,10 +22,10 @@ const AudioCard = ({
       ref={messageRef}
       style={{
         position: 'relative',
-        width: message ? '50%' : '100%',
+        width: message && !isReply ? '50%' : '100%',
         float: isMyMessage ? 'right' : '',
-        marginTop: !message ? 0 : getMarginTop(),
-        marginLeft: !message ? 0 : getMarginLeft()
+        marginTop: !message ? 0 : !isReply && getMarginTop(),
+        marginLeft: !message ? 0 : !isReply && getMarginLeft(),
       }}
     >
       {!message && (
@@ -44,25 +47,34 @@ const AudioCard = ({
         controls
         preload='metadata'
         className={`${
-          isMyMessage ? 'my-audio' : message ? 'not-my-audio' : ''
-        }`}
+          !isReply
+            ? ''
+            : messageSent
+            ? messageOfReply.sender._id === user._id
+              ? 'reply-self'
+              : 'not-reply-self'
+            : isMyMessage
+            ? 'replying my-audio'
+            : 'replying not-my-audio'
+        } ${isReply ? '' : isMyMessage ? 'my-audio' : 'not-my-audio'}`}
         style={{
           width: '100%',
-          
         }}
       >
         <source
           src={
-            audioFile
+            isReply
+              ? null
+              : audioFile
               ? URL.createObjectURL(audioFile)
               : audioUrl
               ? audioUrl
-              : ''
+              : null
           }
           type='audio/mp3'
         />
       </audio>
-      {message && (
+      {message && !isReply && (
         <span
           style={{
             fontSize: '0.65rem',

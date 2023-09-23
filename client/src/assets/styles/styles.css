@@ -22,17 +22,35 @@ audio::-webkit-media-controls-play-button:hover {
 audio.my-audio::-webkit-media-controls-panel {
   background-color: #BEE3F8
 }
+audio.reply-self::-webkit-media-controls-panel {
+  background-color: #bee3f8cb
+}
+audio.my-audio.replying::-webkit-media-controls-panel {
+  background-color: #DDF2FF
+}
+audio.my-audio.replying::-webkit-media-controls-play-button:hover {
+  background-color: #76cdff;
+}
+
 audio.my-audio::-webkit-media-controls-play-button:hover {
   background-color: #32b4ff;
-  border-radius: 50%;
 }
-audio.not-my-audio::-webkit-media-controls-panel {
+audio.not-my-audio::-webkit-media-controls-panel{
   background-color: #B9F5D0;
+}
+audio.not-reply-self::-webkit-media-controls-panel {
+  background-color: #b9f5d0d2;
 }
 audio.not-my-audio::-webkit-media-controls-play-button:hover {
   background-color: #31ff80;
-  border-radius: 50%;
 }
+audio.not-my-audio.replying::-webkit-media-controls-panel {
+  background-color: #E5FFEF;
+}
+audio.not-my-audio.replying::-webkit-media-controls-play-button:hover {
+  background-color: #77fdab;
+}
+
 /* audio::-webkit-media-controls {
   display: none !important;
 }
