@@ -4,13 +4,70 @@
   overflow-y: scroll;
   scrollbar-width: none;
 }
-.message {
-  display: flex;
-  align-items: center;
-}
 .text-wrapper {
 	width: 100%;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	overflow: hidden;
 }
+
+/* audio styling css */
+audio::-webkit-media-controls-panel {
+  background-color: #fdeade;
+}
+audio::-webkit-media-controls-play-button:hover {
+  background-color: #ff6200;
+  border-radius: 50%;
+}
+audio.my-audio::-webkit-media-controls-panel {
+  background-color: #BEE3F8
+}
+audio.my-audio::-webkit-media-controls-play-button:hover {
+  background-color: #32b4ff;
+  border-radius: 50%;
+}
+audio.not-my-audio::-webkit-media-controls-panel {
+  background-color: #B9F5D0;
+}
+audio.not-my-audio::-webkit-media-controls-play-button:hover {
+  background-color: #31ff80;
+  border-radius: 50%;
+}
+/* audio::-webkit-media-controls {
+  display: none !important;
+}
+
+audio::media-controls {
+  display: none !important;
+} */
+
+/*
+audio::-webkit-media-controls-volume-slider {
+  background-color: #B1D4E0;
+  border-radius: 25px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+audio::-webkit-media-controls-timeline {
+  background-color: #404dff;
+  border-radius: 25px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+audio::-webkit-media-controls-time-remaining-display {
+  color: #fff;
+}
+audio::-webkit-media-controls-current-time-display {
+  color: #ca6666;
+}
+
+audio::-webkit-media-controls-play-button {
+  background-color: #f3a4e2;
+  border-radius: 50%;
+}
+
+audio::-webkit-media-controls-mute-button {
+  background-color: purple;
+  border-radius: 50%;
+} */

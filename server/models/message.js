@@ -10,6 +10,15 @@ const messageSchema = mongoose.Schema(
       type: String,
       trim: true,
     },
+    type: {
+      type: String,
+      trim: true,
+      default: 'text',
+      required: true,
+    },
+    mediaUrl: {
+      type: String,
+    },
     chat: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Chat',

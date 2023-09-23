@@ -12,6 +12,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { register } from '../../Helper/auth_api_helper';
 import { ChatState } from '../../Context/ChatProvider';
+import { uploadToCloudinary } from '../../utils/cloudinary';
 
 const SignUp = () => {
   const { setUser, setChats } = ChatState();
@@ -26,7 +27,7 @@ const SignUp = () => {
   const toast = useToast();
   const navigate = useNavigate();
 
-  const processImg = (file) => {
+  const processImg = async (file) => {
     setLoading(true);
     if (!file) {
       toast({
@@ -53,23 +54,14 @@ const SignUp = () => {
       setLoading(false);
       return;
     }
-    const data = new FormData();
-    data.append('file', file);
-    data.append('upload_preset', 'howdy-chat-app');
-    data.append('cloud_name', process.env.REACT_APP_CLOUDINARY_CLOUD_NAME);
-    fetch(process.env.REACT_APP_CLOUDINARY_API, {
-      method: 'post',
-      body: data,
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setPic(data.url.toString());
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error('error in image upload, ', err);
-        setLoading(false);
-      });
+    try {
+      const picUrl = await uploadToCloudinary(file);
+      setPic(picUrl);
+    } catch (err) {
+      console.error('error in image upload, ', err);
+    } finally {
+      setLoading(false);
+    }
   };
   const submitHandler = async () => {
     setLoading(true);
@@ -111,7 +103,7 @@ const SignUp = () => {
       return;
     }
     try {
-      setChats(null)
+      setChats(null);
       const { data } = await register({
         name,
         email,

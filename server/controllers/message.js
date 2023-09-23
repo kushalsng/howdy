@@ -4,9 +4,9 @@ const Message = require('../models/message.js');
 const Chat = require('../models/chat.js');
 
 exports.sendMessage = asyncHandler(async (req, res) => {
-  const { chatId, content, replyOfMessageId } = req.body;
+  const { chatId, content, type, mediaUrl, replyOfMessageId } = req.body;
   try {
-    if (!chatId || !content) {
+    if (!chatId || (!mediaUrl && !content)) {
       return res.status(400).json({
         success: false,
         msg: !chatId ? 'Chat not found!' : 'Message is empty!',
@@ -24,12 +24,14 @@ exports.sendMessage = asyncHandler(async (req, res) => {
       });
     }
     // check if content is valid message or not
-    const messageText = content ? content.trim() : null;
-    if (!messageText || !messageText.length) {
-      return res.status(400).json({
-        success: false,
-        msg: 'Invalid message!',
-      });
+    if (content) {
+      const messageText = content ? content.trim() : null;
+      if (!messageText || !messageText.length) {
+        return res.status(400).json({
+          success: false,
+          msg: 'Invalid message!',
+        });
+      }
     }
     const createMessageConditions = {
       sender: req.user._id,
@@ -50,14 +52,20 @@ exports.sendMessage = asyncHandler(async (req, res) => {
       }
       createMessageConditions.replyOfMessage = replyOfMessageId;
     }
+    if (mediaUrl) {
+      createMessageConditions.mediaUrl = mediaUrl;
+    }
+    if (type) {
+      createMessageConditions.type = type;
+    }
     let message = await Message.create(createMessageConditions);
     message = await message.populate('sender', 'name userPic email');
     if (replyOfMessageId) {
       message = await message.populate('replyOfMessage');
       message = await Message.populate(message, {
         path: 'replyOfMessage.sender',
-        select: 'name'
-      })
+        select: 'name',
+      });
     }
     message = await message.populate('chat');
     message = await User.populate(message, {

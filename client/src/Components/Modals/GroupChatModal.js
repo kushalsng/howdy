@@ -28,6 +28,7 @@ import {
   renameGroup,
 } from '../../Helper/chat_api_helper';
 import ConfirmationModal from './ConfirmationModal';
+import { uploadToCloudinary } from '../../utils/cloudinary';
 
 const GroupChatModal = ({ isUpdate = false, children }) => {
   const limit = 5;
@@ -75,7 +76,7 @@ const GroupChatModal = ({ isUpdate = false, children }) => {
     }
   }, 300);
 
-  const processImg = (file) => {
+  const processImg = async (file) => {
     setLoading(true);
     if (!file) {
       toast({
@@ -102,23 +103,14 @@ const GroupChatModal = ({ isUpdate = false, children }) => {
       setLoading(false);
       return;
     }
-    const data = new FormData();
-    data.append('file', file);
-    data.append('upload_preset', 'howdy-chat-app');
-    data.append('cloud_name', process.env.REACT_APP_CLOUDINARY_CLOUD_NAME);
-    fetch(process.env.REACT_APP_CLOUDINARY_API, {
-      method: 'post',
-      body: data,
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setPic(data.url.toString());
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error('error in image upload, ', err);
-        setLoading(false);
-      });
+    try {
+      const picUrl = await uploadToCloudinary(file);
+      setPic(picUrl);
+    } catch (err) {
+      console.error('error in image upload, ', err);
+    } finally {
+      setLoading(false);
+    }
   };
   const handleCreateGroup = async () => {
     if (!chatName || !selectedUsers || !selectedUsers?.length) {
@@ -448,6 +440,8 @@ const GroupChatModal = ({ isUpdate = false, children }) => {
   useEffect(() => {
     if (isOpen) {
       handleSearch();
+    } else {
+      setPic(null)
     }
   }, [isOpen, search]);
   useEffect(() => {

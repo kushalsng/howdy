@@ -7,6 +7,7 @@ import GroupLog from '../Message/GroupLog';
 import { isSameUser } from '../../utils/chat';
 import { ChatState } from '../../Context/ChatProvider';
 import { avatarWidth } from '../../Constants/message';
+import AudioCard from '../Message/AudioCard';
 
 const ScrollableChat = ({
   messages,
@@ -49,9 +50,9 @@ const ScrollableChat = ({
               <GroupLog message={message} messageBoxRef={messageBoxRef} />
             ) : (
               <>
-                {(!isSameUser(messages, message, index, user._id) &&
+                {!isSameUser(messages, message, index, user._id) &&
                   message.sender._id !== user._id &&
-                  message.chat.isGroupChat) && (
+                  message.chat.isGroupChat && (
                     <span
                       style={{
                         fontSize: '0.7rem',

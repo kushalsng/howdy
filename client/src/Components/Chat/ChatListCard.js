@@ -61,7 +61,13 @@ const ChatListCard = ({ chat }, key) => {
         fontSize='0.9rem'
         color={selectedChat?._id === chat._id ? '#353535' : '#595959'}
       >
-        {chat.latestMessage
+        {chat.latestMessage.type === 'audio'
+          ? (chat.latestMessage.isGroupChat
+              ? chat.users
+                  .find((user) => user._id === chat.latestMessage.sender)
+                  ?.name.split(' ')[0] + ': '
+              : '') + 'Sent an audio'
+          : chat.latestMessage
           ? ` ${
               chat.latestMessage.isGroupLog
                 ? ''
