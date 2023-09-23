@@ -21,6 +21,5 @@ router.route('/leave-group').put(leaveGroup);
 // make admin - only admin can do this
 // delete one-to-one chat
 // delete group chat
-// add group display picture
 
 module.exports = router;

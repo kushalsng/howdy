@@ -3,8 +3,9 @@ import { RiCloseLine } from 'react-icons/ri';
 
 import React from 'react';
 import { ChatState } from '../../Context/ChatProvider';
+import AudioCard from './AudioCard';
 
-const ReplyCard = ({ message, setReplyOfMessage }) => {
+const ReplyCard = ({ message, setReplyOfMessage, messageOfReply }) => {
   const { user } = ChatState();
   const isMyMessage = Boolean(message.sender._id === user._id);
   return (
@@ -59,12 +60,22 @@ const ReplyCard = ({ message, setReplyOfMessage }) => {
       </CardHeader>
 
       <CardBody pb={1} pt={0} px={2} fontSize='0.9rem'>
-        <Text
-          color={!setReplyOfMessage ? '#777' : '#000'}
-          className='text-wrapper'
-        >
-          {message.content}
-        </Text>
+        {message.type === 'audio' ? (
+          <AudioCard
+            message={message}
+            audioUrl={message.mediaUrl}
+            isReply={true}
+            messageSent={!Boolean(setReplyOfMessage)}
+            messageOfReply={messageOfReply}
+          />
+        ) : (
+          <Text
+            color={!setReplyOfMessage ? '#777' : '#000'}
+            className='text-wrapper'
+          >
+            {message.content}
+          </Text>
+        )}
       </CardBody>
     </Card>
   );

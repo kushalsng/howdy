@@ -23,9 +23,11 @@ import Lottie from 'react-lottie';
 import typingAnimationData from '../../assets/animations/typing.json';
 import audioRecordingAnimationData from '../../assets/animations/audio-recording2.json';
 import ReplyCard from '../Message/ReplyCard';
-import { RiSendPlane2Fill, RiMicFill } from 'react-icons/ri';
+import AudioCard from '../Message/AudioCard';
+import { RiSendPlane2Fill, RiMicFill, RiDeleteBin5Fill } from 'react-icons/ri';
 import { FaRegSmile } from 'react-icons/fa';
-import EmojiPicker  from 'emoji-picker-react';
+import EmojiPicker from 'emoji-picker-react';
+import { uploadToCloudinary } from '../../utils/cloudinary';
 
 let socket, selectedChatCompare;
 
@@ -36,8 +38,6 @@ const SingleChat = () => {
     setSelectedChat,
     notifications,
     setNotifications,
-    chats,
-    setChats,
   } = ChatState();
   const messageBoxRef = useRef(null);
   const inputBoxRef = useRef(null);
@@ -51,13 +51,17 @@ const SingleChat = () => {
   const [typing, setTyping] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [replyOfMessage, setReplyOfMessage] = useState(null);
-  const [isOpenEmojiPicker, setIsOpenEmojiPicker] = useState(true);
+  const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(true);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [isRecordingAudio, setIsRecordingAudio] = useState(false);
+  const [isDiscardAudio, setIsDiscardAudio] = useState(false);
+  const [audioMediaRecorder, setAudioMediaRecorder] = useState(null);
+  const [audioFile, setAudioFile] = useState(null);
 
   const escapeKeyHandler = (e) => {
     if (e.key === 'Escape') {
-      setIsOpenEmojiPicker(false);
+      setIsEmojiPickerOpen(false);
+      clearAudioRecording();
       inputBoxRef.current.focus();
     }
   };
@@ -84,12 +88,12 @@ const SingleChat = () => {
     }
   };
 
-  const sendMessageHandler = async (e) => {
+  const sendTextMessageHandler = async (e) => {
     if ((e.key === 'Enter' || e.type === 'click') && newMessage) {
       socket.emit('stop typing', selectedChat._id);
       try {
         setNewMessage('');
-        setIsOpenEmojiPicker(false);
+        setIsEmojiPickerOpen(false);
         const params = {
           chatId: selectedChat._id,
           content: newMessage,
@@ -115,6 +119,29 @@ const SingleChat = () => {
       }
     }
   };
+  const sendAudioRecording = async (mediaUrl) => {
+    if (!mediaUrl) return;
+    try {
+      const params = {
+        chatId: selectedChat._id,
+        mediaUrl,
+        type: 'audio',
+      };
+      const { data } = await sendMessage(params);
+      setMessages([...messages, data.message]);
+    } catch (err) {
+      console.error('error while sending audio: ', err);
+      toast({
+        title: 'Unable to send audio',
+        description: err.response.data.msg,
+        status: 'error',
+        duration: 4000,
+        isClosable: true,
+        position: 'bottom',
+        variant: 'left-accent',
+      });
+    }
+  };
   const typingHandler = async (e) => {
     setNewMessage(e.target.value);
     if (!isSocketConnected) return;
@@ -135,6 +162,75 @@ const SingleChat = () => {
       }
     }, timerLength);
   };
+
+  const onRecordAudio = async () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      toast({
+        title: `Your browser doesn't support audio recording!`,
+        status: 'error',
+        duration: 4000,
+        isClosable: true,
+        position: 'bottom',
+        variant: 'left-accent',
+      });
+      return;
+    }
+    setIsEmojiPickerOpen(false);
+    try {
+      if (!audioMediaRecorder) {
+        const blob = [];
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+        setIsRecordingAudio(true);
+        const mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.start();
+        mediaRecorder.ondataavailable = (e) => {
+          blob.push(e.data);
+        };
+        mediaRecorder.onstop = () => {
+          if (isDiscardAudio) {
+            clearAudioRecording();
+            setIsDiscardAudio(false);
+          } else {
+            onStopRecordAudio(blob);
+          }
+        };
+        setAudioMediaRecorder(mediaRecorder);
+      } else {
+        audioMediaRecorder.stop();
+      }
+    } catch (err) {
+      toast({
+        title: `Permission denied to record audio!`,
+        status: 'error',
+        duration: 4000,
+        isClosable: true,
+        position: 'bottom',
+        variant: 'left-accent',
+      });
+    }
+  };
+  const onStopRecordAudio = async (blob) => {
+    setIsEmojiPickerOpen(false);
+    clearAudioRecording();
+    const audioBlob = new Blob(blob, { type: 'audio/mp3' });
+    const mediaUrl = await uploadToCloudinary(audioBlob, 'audio');
+    sendAudioRecording(mediaUrl);
+  };
+  const clearAudioRecording = () => {
+    setAudioMediaRecorder(null);
+    setIsRecordingAudio(false);
+  };
+  const clearAudioFile = () => {
+    setAudioFile(null);
+  };
+  useEffect(() => {
+    if (isDiscardAudio) {
+      clearAudioRecording();
+      setIsDiscardAudio(false);
+    }
+  }, [isDiscardAudio]);
   useEffect(() => {
     if (user) {
       socket = io(process.env.REACT_APP_BASE_URL);
@@ -147,8 +243,9 @@ const SingleChat = () => {
   useEffect(() => {
     fetchMessages();
     setNewMessage('');
-    setIsOpenEmojiPicker(false);
+    setIsEmojiPickerOpen(false);
     setReplyOfMessage(null);
+    clearAudioRecording();
     selectedChatCompare = selectedChat;
   }, [selectedChat]);
 
@@ -259,7 +356,7 @@ const SingleChat = () => {
             ) : (
               <div
                 className='messages'
-                onClick={() => setIsOpenEmojiPicker(false)}
+                onClick={() => setIsEmojiPickerOpen(false)}
                 ref={messageBoxRef}
               >
                 <ScrollableChat
@@ -275,7 +372,7 @@ const SingleChat = () => {
             )}
             <FormControl
               onKeyDown={(e) => {
-                sendMessageHandler(e);
+                sendTextMessageHandler(e);
                 escapeKeyHandler(e);
               }}
               isRequired
@@ -314,6 +411,13 @@ const SingleChat = () => {
                     setReplyOfMessage={setReplyOfMessage}
                   />
                 )}
+
+                {audioFile && (
+                  <AudioCard
+                    audioFile={audioFile}
+                    clearAudioFile={clearAudioFile}
+                  />
+                )}
                 <div
                   style={{
                     display: 'flex',
@@ -324,7 +428,8 @@ const SingleChat = () => {
                   <Input
                     ref={inputBoxRef}
                     variant='filled'
-                    px='2.8rem'
+                    ps='2.8rem'
+                    pe={isRecordingAudio ? '6rem' : '2.8rem'}
                     bg='#E8E8E8'
                     placeholder='Write a message...'
                     onChange={typingHandler}
@@ -341,7 +446,7 @@ const SingleChat = () => {
                       cursor: 'pointer',
                     }}
                     onClick={() => {
-                      setIsOpenEmojiPicker(!isOpenEmojiPicker);
+                      setIsEmojiPickerOpen(!isEmojiPickerOpen);
                     }}
                   >
                     <FaRegSmile />
@@ -355,28 +460,49 @@ const SingleChat = () => {
                       fontSize: 25,
                       color: '#262626',
                       padding: '0.5rem 0.7rem',
-                      cursor: 'pointer',
+                      display: 'flex',
+                      gap: '0.5rem',
                     }}
-                    onClick={() => {setIsRecordingAudio(!isRecordingAudio)}}
                   >
-                    {isRecordingAudio ? (
-                      <Lottie
-                        options={{
-                          loop: true,
-                          autoplay: true,
-                          animationData: audioRecordingAnimationData,
-                          rendererSettings: {
-                            preserveAspectRatio: 'xMidYMid slice',
-                          },
-                        }}
-                        width={70}
-                        style={{ marginBottom: 15, marginLeft: 0 }}
-                      />
-                    ) : (
-                      <RiMicFill />
-                    )}
+                    <RiDeleteBin5Fill
+                      fill='#ff4242'
+                      style={{
+                        display: isRecordingAudio ? 'block' : 'none',
+                        marginTop: '1.4rem',
+                        cursor: 'pointer',
+                      }}
+                      onClick={() => {
+                        setIsDiscardAudio(true);
+                      }}
+                    />
+                    <div
+                      onClick={onRecordAudio}
+                      style={{
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {isRecordingAudio ? (
+                        <Lottie
+                          options={{
+                            loop: true,
+                            autoplay: true,
+                            animationData: audioRecordingAnimationData,
+                            rendererSettings: {
+                              preserveAspectRatio: 'xMidYMid slice',
+                            },
+                          }}
+                          width={70}
+                          style={{
+                            marginBottom: 15,
+                            marginLeft: 0,
+                          }}
+                        />
+                      ) : (
+                        <RiMicFill />
+                      )}
+                    </div>
                   </span>
-                  {isOpenEmojiPicker && (
+                  {isEmojiPickerOpen && (
                     <span
                       style={{
                         position: 'absolute',
@@ -394,7 +520,7 @@ const SingleChat = () => {
                   <Button
                     background='transparent'
                     ms='1rem'
-                    onClick={sendMessageHandler}
+                    onClick={sendTextMessageHandler}
                   >
                     <RiSendPlane2Fill />
                   </Button>

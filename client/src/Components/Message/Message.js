@@ -8,6 +8,7 @@ import { RiReplyFill } from 'react-icons/ri';
 import ReplyCard from './ReplyCard';
 import ProfileModal from '../Modals/ProfileModal';
 import { avatarWidth, replyIconWidth } from '../../Constants/message';
+import AudioCard from './AudioCard';
 
 const Message = ({
   message,
@@ -42,6 +43,26 @@ const Message = ({
       setMarginLeft(0);
     }
   };
+  const getMarginLeft = () => {
+    return !isHoveringMessage
+      ? marginLeft
+      : isMyMessage ||
+        isSameSender(messages, message, index, user._id) ||
+        isLastMessage(messages, index, user._id)
+      ? 0
+      : !selectedChat.isGroupChat
+      ? 0
+      : avatarWidth;
+  };
+  const getMarginTop = () => {
+    return isSameUser(messages, message, index, user._id)
+      ? 3
+      : !isSameUser(messages, message, index, user._id) &&
+        message.sender._id !== user._id &&
+        message.chat.isGroupChat
+      ? 0
+      : 10;
+  };
   useEffect(() => {
     handleResize();
 
@@ -52,7 +73,10 @@ const Message = ({
   }, [messages]);
   return (
     <div
-      className='message'
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+      }}
       onMouseEnter={() => setIsHoveringMessage(true)}
       onMouseLeave={() => setIsHoveringMessage(false)}
     >
@@ -87,48 +111,48 @@ const Message = ({
           <RiReplyFill />
         </span>
       )}
-      <span
-        ref={messageRef}
-        style={{
-          backgroundColor: isMyMessage ? '#BEE3F8' : '#B9F5D0',
-          borderRadius: '20px',
-          padding: '5px 15px',
-          maxWidth: '75%',
-          marginLeft: !isHoveringMessage
-            ? marginLeft
-            : isMyMessage ||
-              isSameSender(messages, message, index, user._id) ||
-              isLastMessage(messages, index, user._id)
-            ? 0
-            : !selectedChat.isGroupChat
-            ? 0
-            : avatarWidth,
-          marginTop: isSameUser(messages, message, index, user._id)
-            ? 3
-            : !isSameUser(messages, message, index, user._id) &&
-              message.sender._id !== user._id &&
-              message.chat.isGroupChat
-            ? 0
-            : 10,
-        }}
-      >
-        {message.replyOfMessage && (
-          <ReplyCard message={message.replyOfMessage} />
-        )}
-        <Box>
-          <span>{message.content}</span>
-          <span
-            style={{
-              fontSize: '0.65rem',
-              color: '#595959',
-              float: 'right',
-              margin: '10px 0px 0px 5px',
-            }}
-          >
-            {DateTime.fromISO(message.updatedAt).toFormat('T')}
-          </span>
-        </Box>
-      </span>
+      {message.type === 'audio' ? (
+        <AudioCard
+          messageRef={messageRef}
+          message={message}
+          audioUrl={message.mediaUrl}
+          getMarginTop={getMarginTop}
+          getMarginLeft={getMarginLeft}
+        />
+      ) : (
+        <span
+          ref={messageRef}
+          style={{
+            backgroundColor: isMyMessage ? '#BEE3F8' : '#B9F5D0',
+            borderRadius: '20px',
+            padding: '5px 15px',
+            maxWidth: '75%',
+            marginLeft: getMarginLeft(),
+            marginTop: getMarginTop(),
+            width: message.replyOfMessage?.type === 'audio' ? '50%' : '',
+          }}
+        >
+          {message.replyOfMessage && (
+            <ReplyCard
+              message={message.replyOfMessage}
+              messageOfReply={message}
+            />
+          )}
+          <Box>
+            <span>{message.content}</span>
+            <span
+              style={{
+                fontSize: '0.65rem',
+                color: '#595959',
+                float: 'right',
+                margin: '10px 0px 0px 5px',
+              }}
+            >
+              {DateTime.fromISO(message.updatedAt).toFormat('T')}
+            </span>
+          </Box>
+        </span>
+      )}
 
       {isHoveringMessage && (
         <span
