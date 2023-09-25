@@ -22,6 +22,7 @@ app.use((req, res, next) => {
   if (
     req._parsedUrl.pathname === '/register' ||
     req._parsedUrl.pathname === '/login' ||
+    req._parsedUrl.pathname === '/google-signin' ||
     req._parsedUrl.pathname === '/'
   ) {
     next();
@@ -33,9 +34,9 @@ app.use((req, res, next) => {
 app.get('/', (req, res) => {
   res.json({
     success: true,
-    msg: "Howdy👋🏻 server running successfully"
-  })
-})
+    msg: 'Howdy👋🏻 server running successfully',
+  });
+});
 app.use('/', authRoutes);
 app.use('/user', userRoutes);
 app.use('/chat', chatRoutes);
@@ -66,7 +67,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('join chat', (room) => {
-    if(roomId){
+    if (roomId) {
       socket.leave(roomId);
       console.log('User left room: ', roomId);
     }
