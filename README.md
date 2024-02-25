@@ -7,6 +7,7 @@
 <body>
     <h1>👋 Howdy - Real Time Chat Application 🚀</h1>
     <p>Welcome to the Howdy repository! Howdy is a real-time chat application built on React, Chakra UI, and Node.js. This application allows users to engage in one-to-one as well as group chats and also supports notification features to keep users informed of new messages. 🎉</p>
+    <p>This project is deployed and live at <a href="https://howdy-there.onrender.com/">https://howdy-there.onrender.com/</a>. 🚀</p>
     <h2>Features</h2>
     <ul>
         <li><strong>One-to-One Chat:</strong> Users can initiate one-to-one conversations with other registered users. Messages are delivered in real-time, providing a seamless chatting experience. 💬</li>
@@ -70,6 +71,7 @@ npm start</code></pre>
     <li>Comment Section in post 💬</li>
     <li>Dark Theme 🌙</li>
 </ul>
+
 
 </body>
 </html>
